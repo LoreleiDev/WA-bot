@@ -25,7 +25,7 @@ ffmpeg.setFfmpegPath(ffmpegPath);
 const processingUsers = new Map();
 
 // OWNER JID
-const OWNER_JID = "6285174116973@s.whatsapp.net"; 
+const OWNER_JID = "6285174116973@s.whatsapp.net";
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState(
@@ -39,7 +39,7 @@ async function startBot() {
         auth: state,
         printQRInTerminal: false,
         logger: pino({ level: 'silent' }),
-        syncFullHistory: true, // PENTING!
+        syncFullHistory: true,
         markOnlineOnConnect: true
     });
 
@@ -137,6 +137,7 @@ async function startBot() {
             const from = message.key.remoteJid;
             const sender = message.key.participant || from;
             const cleanSender = jidNormalizedUser(sender);
+            const isGroup = from.endsWith('@g.us');
 
             const text = (
                 message.message?.conversation ||
@@ -144,7 +145,9 @@ async function startBot() {
                 message.message?.imageMessage?.caption ||
                 message.message?.videoMessage?.caption ||
                 ''
-            ).trim().toLowerCase();
+            ).trim();
+
+            const textLower = text.toLowerCase();
 
             const hasImage = !!message.message?.imageMessage;
             const hasVideo = !!message.message?.videoMessage;
@@ -157,7 +160,7 @@ async function startBot() {
             // ==========================================
             // COMMAND: .s atau .stiker
             // ==========================================
-            if (text === '.s' || text === '.stiker') {
+            if (textLower === '.s' || textLower === '.stiker') {
                 if (processingUsers.has(sender)) {
                     await sock.sendMessage(from, {
                         text: '⚠️ Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu hingga selesai.'
@@ -247,9 +250,9 @@ async function startBot() {
             }
 
             // ==========================================
-            // COMMAND: .nvo - EXTRACT VIEW ONCE (SIAPA SAJA BISA PAKAI)
+            // COMMAND: .nvo - EXTRACT VIEW ONCE
             // ==========================================
-            else if (text === '.nvo') {
+            else if (textLower === '.nvo') {
                 if (processingUsers.has(sender)) {
                     await sock.sendMessage(from, {
                         text: '⚠️ Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu hingga selesai.'
@@ -274,7 +277,6 @@ async function startBot() {
                     let mediaMessage = null;
                     let mediaType = null;
 
-                    // Cek view once wrapper
                     const viewOnce = quotedMsg.viewOnceMessageV2?.message || quotedMsg.viewOnceMessage?.message;
                     const targetMsg = viewOnce || quotedMsg;
 
@@ -310,7 +312,6 @@ async function startBot() {
 
                             console.log(`[SUCCESS] Media berhasil didownload: ${(buffer.length / 1024 / 1024).toFixed(2)}MB`);
 
-                            // KIRIM BALIK KE CHAT YANG SAMA (bukan cuma ke owner)
                             if (mediaType === 'image') {
                                 await sock.sendMessage(from, {
                                     image: buffer,
@@ -344,20 +345,7 @@ async function startBot() {
                                 }, { quoted: message });
                             }
 
-                            // Juga kirim backup ke owner
-                            if (mediaType === 'image') {
-                                await sock.sendMessage(OWNER_JID, {
-                                    image: buffer,
-                                    caption: `Extract dari: ${cleanSender}`
-                                });
-                            } else if (mediaType === 'video') {
-                                await sock.sendMessage(OWNER_JID, {
-                                    video: buffer,
-                                    caption: `Extract dari: ${cleanSender}`
-                                });
-                            }
-
-                            console.log(`[SUCCESS] Media berhasil dikirim ke chat dan owner.`);
+                            console.log(`[SUCCESS] Media berhasil dikirim ke chat.`);
                         } catch (err) {
                             console.error("[ERROR] Gagal proses media:", err);
                             await sock.sendMessage(from, {
@@ -375,9 +363,179 @@ async function startBot() {
             }
 
             // ==========================================
+            // COMMAND: .tagall - HIDDEN TAG (SILENT)
+            // ==========================================
+            else if (textLower.startsWith('.tagall')) {
+                if (!isGroup) {
+                    await sock.sendMessage(from, {
+                        text: '❌ Command `.tagall` hanya bisa digunakan di dalam grup!'
+                    }, { quoted: message });
+                    return;
+                }
+
+                if (processingUsers.has(sender)) {
+                    await sock.sendMessage(from, {
+                        text: '⚠️ Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu hingga selesai.'
+                    }, { quoted: message });
+                    return;
+                }
+
+                processingUsers.set(sender, true);
+
+                try {
+                    console.log('📢 Tag all diminta oleh:', cleanSender);
+
+                    const tagMessage = text.substring(7).trim() || 'Halo semua! 👋';
+
+                    const groupMetadata = await sock.groupMetadata(from);
+                    const groupName = groupMetadata.subject || 'Grup';
+                    const participants = groupMetadata.participants.map(p => p.id);
+
+                    if (participants.length === 0) {
+                        await sock.sendMessage(from, {
+                            text: '❌ Tidak ada member di grup ini.'
+                        }, { quoted: message });
+                        return;
+                    }
+
+                    // HIDETAG: Text tidak ada @mention, tapi tetap kirim mentions
+                    let mentionText = `📢 *${groupName}*\n\n`;
+                    mentionText += `💬 ${tagMessage}\n\n`;
+                    mentionText += `👥 _${participants.length} member_`;
+
+                    // PENTING: Tetap kirim mentions array, tapi text tidak ada @JID
+                    await sock.sendMessage(from, {
+                        text: mentionText,
+                        mentions: participants // User tetap dapat notifikasi!
+                    }, { quoted: message });
+
+                    console.log(`✅ Berhasil hidetag ${participants.length} member!`);
+                } catch (err) {
+                    console.error('Error tag all:', err);
+                    await sock.sendMessage(from, {
+                        text: `❌ Gagal melakukan tag all.\n\nError: ${err.message}`
+                    }, { quoted: message });
+                } finally {
+                    processingUsers.delete(sender);
+                }
+            }
+
+            // ==========================================
+            // COMMAND: .me atau .profile - INFO PROFIL
+            // ==========================================
+            else if (textLower === '.me' || textLower.startsWith('.profile')) {
+                if (processingUsers.has(sender)) {
+                    await sock.sendMessage(from, {
+                        text: '⚠️ Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu hingga selesai.'
+                    }, { quoted: message });
+                    return;
+                }
+
+                processingUsers.set(sender, true);
+
+                try {
+                    // Default: profil sendiri
+                    let targetJid = cleanSender;
+                    let targetPhoneNumber = null;
+                    let isSelf = true;
+
+                    // Cek apakah ada mention
+                    const contextInfo = message.message?.extendedTextMessage?.contextInfo;
+                    const mentionedJid = contextInfo?.mentionedJid;
+
+                    if (mentionedJid && mentionedJid.length > 0) {
+                        targetJid = jidNormalizedUser(mentionedJid[0]);
+                        isSelf = false;
+                        console.log('✅ Target mention JID:', targetJid);
+                    }
+
+                    console.log(`👤 Profile check untuk: ${targetJid} (Self: ${isSelf})`);
+
+                    // Cek apakah di grup
+                    let userRole = 'Member';
+                    let groupName = 'Private Chat';
+
+                    if (isGroup) {
+                        try {
+                            const groupMetadata = await sock.groupMetadata(from);
+                            groupName = groupMetadata.subject || 'Grup';
+
+                            const participant = groupMetadata.participants.find(p => {
+                                const pId = jidNormalizedUser(p.id);
+                                const tId = jidNormalizedUser(targetJid);
+                                return pId === tId;
+                            });
+
+                            if (participant) {
+                                console.log('✅ Participant found');
+
+                                // Ambil nomor asli
+                                if (participant.phoneNumber) {
+                                    targetPhoneNumber = participant.phoneNumber.split('@')[0];
+                                    console.log('✅ Nomor asli:', targetPhoneNumber);
+                                }
+
+                                // Cek role
+                                if (participant.admin === 'admin' || participant.admin === 'superadmin') {
+                                    userRole = participant.admin === 'superadmin' ? 'Super Admin' : 'Admin';
+                                } else {
+                                    userRole = 'Member';
+                                }
+                            }
+                        } catch (e) {
+                            console.log('⚠️ Error ambil metadata grup:', e.message);
+                        }
+                    }
+
+                    // Nomor final
+                    const userId = targetPhoneNumber || targetJid.split('@')[0];
+
+                    // Cek apakah owner
+                    const isOwner = targetJid === OWNER_JID;
+                    const roleText = isOwner ? '👑 *Owner Bot*' : `👤 *${userRole}*`;
+
+                    // Format info
+                    let joinedInfo = '';
+                    if (isGroup) {
+                        joinedInfo = `\n🏠 *Grup:* ${groupName}`;
+                    }
+
+                    // PENTING: Pakai @JID di text, nanti WhatsApp yang replace dengan nama
+                    const profileText = `🤖 *INFO PROFIL${isSelf ? ' KAMU' : ' USER'}*
+
+👤 *Nama:* @${targetJid.split('@')[0]}
+📱 *Nomor:* +${userId}
+${roleText}${joinedInfo}
+
+━━━━━━━━━━━━━━━━━━
+🤖 *Bot Info:*
+• Nama: Bronya Zaychik
+• Creator: Lorelei Project
+• GitHub: https://github.com/LoreleiDev
+• Sponsor: averanteam.web.id
+
+✨ _Ketik .list untuk melihat command_`;
+
+                    await sock.sendMessage(from, {
+                        text: profileText,
+                        mentions: [targetJid]
+                    }, { quoted: message });
+
+                    console.log('✅ Profile berhasil dikirim!');
+                } catch (err) {
+                    console.error('Error profile:', err);
+                    await sock.sendMessage(from, {
+                        text: `❌ Gagal menampilkan profil.\n\nError: ${err.message}`
+                    }, { quoted: message });
+                } finally {
+                    processingUsers.delete(sender);
+                }
+            }
+
+            // ==========================================
             // COMMAND: .p atau .ping
             // ==========================================
-            else if (text === '.p' || text === '.ping') {
+            else if (textLower === '.p' || textLower === '.ping') {
                 console.log('🏓 Ping command diterima!');
 
                 const botImagePath = path.join(__dirname, 'bronya.jpg');
@@ -397,7 +555,7 @@ async function startBot() {
             // ==========================================
             // COMMAND: .l atau .list
             // ==========================================
-            else if (text === '.l' || text === '.list') {
+            else if (textLower === '.l' || textLower === '.list') {
                 console.log('📋 List command diminta!');
 
                 const listText = `🤖 *BRONYA ZAYCHIK - Command List*
@@ -412,8 +570,14 @@ async function startBot() {
 • *.nvo* - Extract pesan view once (sekali lihat)
   └ Reply pesan view once dengan .nvo
   └ Support: image, video, audio, document
-  └ Media akan dikirim balik ke chat
-  └ Siapa saja bisa pakai!
+
+📢 *Grup & Interaksi:*
+• *.tagall <pesan>* - Mention semua member di grup
+  └ Contoh: .tagall Halo semua!
+  └ Hanya bisa dipakai di grup
+• *.me* - Lihat info profil kamu
+• *.profile @user* - Lihat info profil orang lain
+  └ Contoh: .profile @6285174116973
 
 📡 *Status Bot:*
 • *.p* atau *.ping* - Cek status bot & info creator
