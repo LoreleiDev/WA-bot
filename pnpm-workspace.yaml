@@ -1,3 +1,6 @@
 allowBuilds:
-  '@whiskeysockets/baileys': set this to true or false
-  protobufjs: set this to true or false
+  '@whiskeysockets/baileys': true
+  ffmpeg-static: true
+  protobufjs: false
+  sharp: true
+  youtube-dl-exec: true
