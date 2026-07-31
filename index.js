@@ -3,8 +3,6 @@ const {
     useMultiFileAuthState,
     DisconnectReason,
     fetchLatestBaileysVersion,
-    downloadMediaMessage,
-    downloadContentFromMessage,
     jidNormalizedUser
 } = require('@whiskeysockets/baileys');
 
@@ -13,19 +11,15 @@ const pino = require('pino');
 const qrcode = require('qrcode-terminal');
 const path = require('path');
 const fs = require('fs');
-const { Sticker, StickerTypes } = require('wa-sticker-formatter');
-const ffmpegPath = require('ffmpeg-static');
-const ffmpeg = require('fluent-ffmpeg');
+const { handleCommand } = require('./handlers/commandHandler');
+const settings = require('./config/settings');
 
-ffmpeg.setFfmpegPath(ffmpegPath);
-
-// ==========================================
-// ANTI-SPAM: Track user yang sedang proses
-// ==========================================
-const processingUsers = new Map();
-
-// OWNER JID
-const OWNER_JID = "6285174116973@s.whatsapp.net";
+// Pastikan folder data ada
+const dataPath = path.join(__dirname, 'data');
+if (!fs.existsSync(dataPath)) {
+    fs.mkdirSync(dataPath);
+    console.log('📁 Folder data created');
+}
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState(
@@ -64,7 +58,9 @@ async function startBot() {
 
         if (connection === 'open') {
             console.clear();
-            console.log('✅ Bot berhasil online dan terhubung!');
+            console.log(`✅ ${settings.BOT_NAME} berhasil online dan terhubung!`);
+            console.log(`👤 Owner: ${settings.OWNER_JID.split('@')[0]}`);
+            console.log(`✨ Ready to serve!`);
         }
 
         if (connection === 'close') {
@@ -91,7 +87,7 @@ async function startBot() {
                 const groupMetadata = await sock.groupMetadata(anu.id);
                 groupName = groupMetadata.subject || 'Grup';
             } catch (metaError) {
-                console.log('⚠️ Tidak bisa akses metadata grup, menggunakan nama default');
+                console.log('⚠️ Tidak bisa akses metadata grup');
             }
 
             const participants = anu.participants.map(p => {
@@ -107,16 +103,16 @@ async function startBot() {
                 for (let participant of participants) {
                     welcomeText += `@${participant.split('@')[0]} `;
                 }
-                welcomeText += `, selamat datang di grup *${groupName}*! \n\n📌 *Tata Tertib Singkat:*\nMohon untuk mengubah nama kontak kamu menjadi format *nama_RMED* agar sesama member bisa saling save contact (SV) dengan mudah ya.\n\n🎮 *Gabung Komunitas Discord Kami!*\nYuk merapat ke server Discord kita:\n🔗 https://discord.gg/xPUVCG2mgq\n\n✨ _Disponsori oleh: averanteam.web.id_\n\nSalam hangat dari kami! 🤖`;
+                welcomeText += `, selamat datang di grup *${groupName}*! \n\n📌 *Tata Tertib Singkat:*\nMohon untuk mengubah nama kontak kamu menjadi format *nama_RMED* agar sesama member bisa saling save contact (SV) dengan mudah ya.\n\n🎮 *Gabung Komunitas Discord Kami!*\nYuk merapat ke server Discord kita:\n🔗 ${settings.DISCORD}\n\n✨ _Disponsori oleh: ${settings.SPONSOR}_\n\nSalam hangat dari kami! 🤖`;
 
                 await sock.sendMessage(anu.id, { text: welcomeText, mentions: participants });
             }
             else if (anu.action === 'remove') {
-                let leaveText = `Selamat jalan `;
+                let leaveText = ` Selamat jalan `;
                 for (let participant of participants) {
                     leaveText += `@${participant.split('@')[0]} `;
                 }
-                leaveText += `\n\nTerima kasih sudah mampir di *${groupName}*. Sampai jumpa! 👋\n\n✨ _Disponsori oleh: averanteam.web.id_`;
+                leaveText += `\n\nTerima kasih sudah mampir di *${groupName}*. Sampai jumpa!\n\n✨ _Disponsori oleh: ${settings.SPONSOR}_`;
 
                 await sock.sendMessage(anu.id, { text: leaveText, mentions: participants });
             }
@@ -126,478 +122,13 @@ async function startBot() {
     });
 
     // ==========================================
-    // FITUR COMMAND
+    // HANDLER PESAN MASUK
     // ==========================================
     sock.ev.on('messages.upsert', async (m) => {
-        try {
-            const message = m.messages[0];
-            if (!message.message) return;
-            if (message.key.fromMe) return;
-
-            const from = message.key.remoteJid;
-            const sender = message.key.participant || from;
-            const cleanSender = jidNormalizedUser(sender);
-            const isGroup = from.endsWith('@g.us');
-
-            const text = (
-                message.message?.conversation ||
-                message.message?.extendedTextMessage?.text ||
-                message.message?.imageMessage?.caption ||
-                message.message?.videoMessage?.caption ||
-                ''
-            ).trim();
-
-            const textLower = text.toLowerCase();
-
-            const hasImage = !!message.message?.imageMessage;
-            const hasVideo = !!message.message?.videoMessage;
-
-            const contextInfo = message.message?.extendedTextMessage?.contextInfo;
-            const isQuoted = !!contextInfo?.quotedMessage;
-            const quotedMessage = contextInfo?.quotedMessage || null;
-            const quotedType = quotedMessage ? Object.keys(quotedMessage)[0] : null;
-
-            // ==========================================
-            // COMMAND: .s atau .stiker
-            // ==========================================
-            if (textLower === '.s' || textLower === '.stiker') {
-                if (processingUsers.has(sender)) {
-                    await sock.sendMessage(from, {
-                        text: '⚠️ Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu hingga selesai.'
-                    }, { quoted: message });
-                    return;
-                }
-
-                processingUsers.set(sender, true);
-
-                try {
-                    let mediaBuffer = null;
-                    let isVideo = false;
-
-                    if (isQuoted && (quotedType === 'imageMessage' || quotedType === 'videoMessage')) {
-                        console.log('📸 Mengkonversi media yang di-reply...');
-
-                        const quotedMsg = {
-                            message: quotedMessage,
-                            key: {
-                                remoteJid: from,
-                                fromMe: false,
-                                id: contextInfo.stanzaId
-                            }
-                        };
-
-                        mediaBuffer = await downloadMediaMessage(
-                            quotedMsg,
-                            'buffer',
-                            {},
-                            { logger: pino({ level: 'silent' }), reuploadRequest: sock.updateMediaMessage }
-                        );
-
-                        isVideo = quotedType === 'videoMessage';
-                    }
-                    else if (hasImage || hasVideo) {
-                        console.log('📸 Mengkonversi media langsung...');
-
-                        mediaBuffer = await downloadMediaMessage(
-                            message,
-                            'buffer',
-                            {},
-                            { logger: pino({ level: 'silent' }), reuploadRequest: sock.updateMediaMessage }
-                        );
-
-                        isVideo = hasVideo;
-                    }
-
-                    if (!mediaBuffer) {
-                        await sock.sendMessage(from, {
-                            text: '❌ Kirim gambar/video dengan caption `.s` atau reply gambar/video dengan `.s`'
-                        }, { quoted: message });
-                        return;
-                    }
-
-                    if (isVideo) {
-                        const duration = hasVideo ?
-                            message.message.videoMessage?.seconds || 0 :
-                            quotedMessage?.videoMessage?.seconds || 0;
-
-                        if (duration > 15) {
-                            await sock.sendMessage(from, {
-                                text: `⚠️ Video terlalu panjang! Maksimal 15 detik.\nDurasi: ${duration} detik.`
-                            }, { quoted: message });
-                            return;
-                        }
-                    }
-
-                    const sticker = new Sticker(mediaBuffer, {
-                        pack: 'Bronya Zaychik',
-                        author: 'Lorelei Project',
-                        type: StickerTypes.FULL,
-                        categories: ['🤩', ''],
-                        id: '12345',
-                        quality: 50
-                    });
-
-                    const stickerBuffer = await sticker.toBuffer();
-
-                    await sock.sendMessage(from, {
-                        sticker: stickerBuffer
-                    }, { quoted: message });
-
-                    console.log('✅ Stiker berhasil dibuat!');
-                } finally {
-                    processingUsers.delete(sender);
-                }
-            }
-
-            // ==========================================
-            // COMMAND: .nvo - EXTRACT VIEW ONCE
-            // ==========================================
-            else if (textLower === '.nvo') {
-                if (processingUsers.has(sender)) {
-                    await sock.sendMessage(from, {
-                        text: '⚠️ Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu hingga selesai.'
-                    }, { quoted: message });
-                    return;
-                }
-
-                processingUsers.set(sender, true);
-
-                try {
-                    console.log('[PROCESS] Perintah .nvo dari:', cleanSender);
-
-                    const quotedMsg = message.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-                    if (!quotedMsg) {
-                        console.log('[DEBUG] Gagal: Tidak ada media yang di-reply.');
-                        await sock.sendMessage(from, {
-                            text: '❌ Reply pesan view once dengan command `.nvo`\n\nCara pakai:\n1. Reply pesan view once\n2. Ketik `.nvo`'
-                        }, { quoted: message });
-                        return;
-                    }
-
-                    let mediaMessage = null;
-                    let mediaType = null;
-
-                    const viewOnce = quotedMsg.viewOnceMessageV2?.message || quotedMsg.viewOnceMessage?.message;
-                    const targetMsg = viewOnce || quotedMsg;
-
-                    if (targetMsg.imageMessage) {
-                        mediaMessage = targetMsg.imageMessage;
-                        mediaType = 'image';
-                    }
-                    else if (targetMsg.videoMessage) {
-                        mediaMessage = targetMsg.videoMessage;
-                        mediaType = 'video';
-                    }
-                    else if (targetMsg.stickerMessage) {
-                        mediaMessage = targetMsg.stickerMessage;
-                        mediaType = 'sticker';
-                    }
-                    else if (targetMsg.documentMessage) {
-                        mediaMessage = targetMsg.documentMessage;
-                        mediaType = 'document';
-                    }
-                    else if (targetMsg.audioMessage) {
-                        mediaMessage = targetMsg.audioMessage;
-                        mediaType = 'audio';
-                    }
-
-                    if (mediaMessage && mediaType) {
-                        try {
-                            console.log(`[DOWNLOAD] Sedang mengunduh ${mediaType}...`);
-                            const stream = await downloadContentFromMessage(mediaMessage, mediaType);
-                            let buffer = Buffer.from([]);
-                            for await (const chunk of stream) {
-                                buffer = Buffer.concat([buffer, chunk]);
-                            }
-
-                            console.log(`[SUCCESS] Media berhasil didownload: ${(buffer.length / 1024 / 1024).toFixed(2)}MB`);
-
-                            if (mediaType === 'image') {
-                                await sock.sendMessage(from, {
-                                    image: buffer,
-                                    caption: "👁️ *View Once Extracted*"
-                                }, { quoted: message });
-                            }
-                            else if (mediaType === 'video') {
-                                await sock.sendMessage(from, {
-                                    video: buffer,
-                                    caption: "👁️ *View Once Extracted*"
-                                }, { quoted: message });
-                            }
-                            else if (mediaType === 'sticker') {
-                                await sock.sendMessage(from, {
-                                    sticker: buffer
-                                }, { quoted: message });
-                            }
-                            else if (mediaType === 'audio') {
-                                await sock.sendMessage(from, {
-                                    audio: buffer,
-                                    mimetype: 'audio/mp4',
-                                    ptt: mediaMessage.ptt
-                                }, { quoted: message });
-                            }
-                            else {
-                                await sock.sendMessage(from, {
-                                    document: buffer,
-                                    mimetype: mediaMessage.mimetype,
-                                    fileName: mediaMessage.fileName || 'file',
-                                    caption: "👁️ *View Once Extracted*"
-                                }, { quoted: message });
-                            }
-
-                            console.log(`[SUCCESS] Media berhasil dikirim ke chat.`);
-                        } catch (err) {
-                            console.error("[ERROR] Gagal proses media:", err);
-                            await sock.sendMessage(from, {
-                                text: `❌ Gagal extract media.\n\nError: ${err.message}`
-                            }, { quoted: message });
-                        }
-                    } else {
-                        await sock.sendMessage(from, {
-                            text: '❌ Tidak ditemukan media di pesan yang di-reply.\n\nPastikan pesan yang di-reply adalah view once (foto/video sekali lihat).'
-                        }, { quoted: message });
-                    }
-                } finally {
-                    processingUsers.delete(sender);
-                }
-            }
-
-            // ==========================================
-            // COMMAND: .tagall - HIDDEN TAG (SILENT)
-            // ==========================================
-            else if (textLower.startsWith('.tagall')) {
-                if (!isGroup) {
-                    await sock.sendMessage(from, {
-                        text: '❌ Command `.tagall` hanya bisa digunakan di dalam grup!'
-                    }, { quoted: message });
-                    return;
-                }
-
-                if (processingUsers.has(sender)) {
-                    await sock.sendMessage(from, {
-                        text: '⚠️ Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu hingga selesai.'
-                    }, { quoted: message });
-                    return;
-                }
-
-                processingUsers.set(sender, true);
-
-                try {
-                    console.log('📢 Tag all diminta oleh:', cleanSender);
-
-                    const tagMessage = text.substring(7).trim() || 'Halo semua! 👋';
-
-                    const groupMetadata = await sock.groupMetadata(from);
-                    const groupName = groupMetadata.subject || 'Grup';
-                    const participants = groupMetadata.participants.map(p => p.id);
-
-                    if (participants.length === 0) {
-                        await sock.sendMessage(from, {
-                            text: '❌ Tidak ada member di grup ini.'
-                        }, { quoted: message });
-                        return;
-                    }
-
-                    // HIDETAG: Text tidak ada @mention, tapi tetap kirim mentions
-                    let mentionText = `📢 *${groupName}*\n\n`;
-                    mentionText += `💬 ${tagMessage}\n\n`;
-                    mentionText += `👥 _${participants.length} member_`;
-
-                    // PENTING: Tetap kirim mentions array, tapi text tidak ada @JID
-                    await sock.sendMessage(from, {
-                        text: mentionText,
-                        mentions: participants // User tetap dapat notifikasi!
-                    }, { quoted: message });
-
-                    console.log(`✅ Berhasil hidetag ${participants.length} member!`);
-                } catch (err) {
-                    console.error('Error tag all:', err);
-                    await sock.sendMessage(from, {
-                        text: `❌ Gagal melakukan tag all.\n\nError: ${err.message}`
-                    }, { quoted: message });
-                } finally {
-                    processingUsers.delete(sender);
-                }
-            }
-
-            // ==========================================
-            // COMMAND: .me atau .profile - INFO PROFIL
-            // ==========================================
-            else if (textLower === '.me' || textLower.startsWith('.profile')) {
-                if (processingUsers.has(sender)) {
-                    await sock.sendMessage(from, {
-                        text: '⚠️ Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu hingga selesai.'
-                    }, { quoted: message });
-                    return;
-                }
-
-                processingUsers.set(sender, true);
-
-                try {
-                    // Default: profil sendiri
-                    let targetJid = cleanSender;
-                    let targetPhoneNumber = null;
-                    let isSelf = true;
-
-                    // Cek apakah ada mention
-                    const contextInfo = message.message?.extendedTextMessage?.contextInfo;
-                    const mentionedJid = contextInfo?.mentionedJid;
-
-                    if (mentionedJid && mentionedJid.length > 0) {
-                        targetJid = jidNormalizedUser(mentionedJid[0]);
-                        isSelf = false;
-                        console.log('✅ Target mention JID:', targetJid);
-                    }
-
-                    console.log(`👤 Profile check untuk: ${targetJid} (Self: ${isSelf})`);
-
-                    // Cek apakah di grup
-                    let userRole = 'Member';
-                    let groupName = 'Private Chat';
-
-                    if (isGroup) {
-                        try {
-                            const groupMetadata = await sock.groupMetadata(from);
-                            groupName = groupMetadata.subject || 'Grup';
-
-                            const participant = groupMetadata.participants.find(p => {
-                                const pId = jidNormalizedUser(p.id);
-                                const tId = jidNormalizedUser(targetJid);
-                                return pId === tId;
-                            });
-
-                            if (participant) {
-                                console.log('✅ Participant found');
-
-                                // Ambil nomor asli
-                                if (participant.phoneNumber) {
-                                    targetPhoneNumber = participant.phoneNumber.split('@')[0];
-                                    console.log('✅ Nomor asli:', targetPhoneNumber);
-                                }
-
-                                // Cek role
-                                if (participant.admin === 'admin' || participant.admin === 'superadmin') {
-                                    userRole = participant.admin === 'superadmin' ? 'Super Admin' : 'Admin';
-                                } else {
-                                    userRole = 'Member';
-                                }
-                            }
-                        } catch (e) {
-                            console.log('⚠️ Error ambil metadata grup:', e.message);
-                        }
-                    }
-
-                    // Nomor final
-                    const userId = targetPhoneNumber || targetJid.split('@')[0];
-
-                    // Cek apakah owner
-                    const isOwner = targetJid === OWNER_JID;
-                    const roleText = isOwner ? '👑 *Owner Bot*' : `👤 *${userRole}*`;
-
-                    // Format info
-                    let joinedInfo = '';
-                    if (isGroup) {
-                        joinedInfo = `\n🏠 *Grup:* ${groupName}`;
-                    }
-
-                    // PENTING: Pakai @JID di text, nanti WhatsApp yang replace dengan nama
-                    const profileText = `🤖 *INFO PROFIL${isSelf ? ' KAMU' : ' USER'}*
-
-👤 *Nama:* @${targetJid.split('@')[0]}
-📱 *Nomor:* +${userId}
-${roleText}${joinedInfo}
-
-━━━━━━━━━━━━━━━━━━
-🤖 *Bot Info:*
-• Nama: Bronya Zaychik
-• Creator: Lorelei Project
-• GitHub: https://github.com/LoreleiDev
-• Sponsor: averanteam.web.id
-
-✨ _Ketik .list untuk melihat command_`;
-
-                    await sock.sendMessage(from, {
-                        text: profileText,
-                        mentions: [targetJid]
-                    }, { quoted: message });
-
-                    console.log('✅ Profile berhasil dikirim!');
-                } catch (err) {
-                    console.error('Error profile:', err);
-                    await sock.sendMessage(from, {
-                        text: `❌ Gagal menampilkan profil.\n\nError: ${err.message}`
-                    }, { quoted: message });
-                } finally {
-                    processingUsers.delete(sender);
-                }
-            }
-
-            // ==========================================
-            // COMMAND: .p atau .ping
-            // ==========================================
-            else if (textLower === '.p' || textLower === '.ping') {
-                console.log('🏓 Ping command diterima!');
-
-                const botImagePath = path.join(__dirname, 'bronya.jpg');
-
-                if (fs.existsSync(botImagePath)) {
-                    await sock.sendMessage(from, {
-                        image: fs.readFileSync(botImagePath),
-                        caption: `🤖 *BRONYA ZAYCHIK*\n\n✅ *Status:* Online & Aktif!\n\n👤 *Created by:* Lorelei Project\n🔗 *GitHub:* https://github.com/LoreleiDev\n\n✨ _Disponsori oleh: averanteam.web.id_`
-                    }, { quoted: message });
-                } else {
-                    await sock.sendMessage(from, {
-                        text: `🤖 *BRONYA ZAYCHIK*\n\n✅ *Status:* Online & Aktif!\n\n👤 *Created by:* Lorelei Project\n🔗 *GitHub:* https://github.com/LoreleiDev\n\n✨ _Disponsori oleh: averanteam.web.id_`
-                    }, { quoted: message });
-                }
-            }
-
-            // ==========================================
-            // COMMAND: .l atau .list
-            // ==========================================
-            else if (textLower === '.l' || textLower === '.list') {
-                console.log('📋 List command diminta!');
-
-                const listText = `🤖 *BRONYA ZAYCHIK - Command List*
-
-📌 *Stiker & Media:*
-• *.s* atau *.stiker* - Buat stiker dari gambar/video
-  └ Kirim gambar/video dengan caption .s
-  └ Atau reply gambar/video dengan .s
-  └ Video maksimal 15 detik
-
-👁️ *View Once Extractor:*
-• *.nvo* - Extract pesan view once (sekali lihat)
-  └ Reply pesan view once dengan .nvo
-  └ Support: image, video, audio, document
-
-📢 *Grup & Interaksi:*
-• *.tagall <pesan>* - Mention semua member di grup
-  └ Contoh: .tagall Halo semua!
-  └ Hanya bisa dipakai di grup
-• *.me* - Lihat info profil kamu
-• *.profile @user* - Lihat info profil orang lain
-  └ Contoh: .profile @6285174116973
-
-📡 *Status Bot:*
-• *.p* atau *.ping* - Cek status bot & info creator
-
-📋 *Informasi:*
-• *.l* atau *.list* - Tampilkan list command ini
-
-✨ _Disponsori oleh: averanteam.web.id_
-
-👤 _Created by: Lorelei Project_
-🔗 _GitHub: https://github.com/LoreleiDev_`;
-
-                await sock.sendMessage(from, {
-                    text: listText
-                }, { quoted: message });
-            }
-        } catch (err) {
-            console.error('Error handling command:', err.message);
-        }
+        await handleCommand(sock, m.messages[0]);
     });
+
+    console.log('🚀 Bot system initialized...');
 }
 
 startBot().catch(console.error);
