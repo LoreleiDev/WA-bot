@@ -4,11 +4,9 @@ const { handleTagAll } = require('../features/tagall');
 const { handlePing, handleList } = require('../features/info');
 const { handleProfile } = require('../features/profile');
 const settings = require('../config/settings');
-const { jidNormalizedUser } = require('@whiskeysockets/baileys'); // Ditambahkan untuk validasi owner yang akurat
+const { jidNormalizedUser } = require('@whiskeysockets/baileys');
 
-// Flag untuk bot active/inactive
-// CATATAN: Nilai ini akan kembali ke 'true' setiap kali bot di-restart.
-let isBotActive = true;
+let isBotActive = false;
 
 async function handleCommand(sock, message) {
     try {
@@ -17,10 +15,15 @@ async function handleCommand(sock, message) {
 
         const from = message.key.remoteJid;
         
-        // 1. NORMALISASI JID AGAR VALIDASI OWNER 100% AKURAT
+        // Normalisasi JID pengirim
         const sender = jidNormalizedUser(message.key.participant || from);
-        const ownerJid = jidNormalizedUser(settings.OWNER_JID);
         
+        // Normalisasi JID Owner (dari nomor HP dan dari LID)
+        const ownerJid = jidNormalizedUser(settings.OWNER_JID);
+        const ownerLid = settings.OWNER_LID ? jidNormalizedUser(settings.OWNER_LID) : null;
+
+        // Cek apakah pengirim adalah Owner
+        const isOwner = (sender === ownerJid) || (sender === ownerLid);
         const isGroup = from.endsWith('@g.us');
 
         const rawText = (
@@ -34,14 +37,14 @@ async function handleCommand(sock, message) {
         const textLower = rawText.toLowerCase();
 
         // ==========================================
-        // 2. LOGIC .START DAN .STOP (DIPERBAIKI)
+        // 1. LOGIC .START DAN .STOP (Hanya Owner)
         // ==========================================
         if (textLower === '.start' || textLower === '.stop') {
-            // Cek apakah yang mengetik benar-benar owner
-            if (sender !== ownerJid) {
-                console.log(`⚠️ Percobaan .start/.stop ditolak. Sender: ${sender} | Owner: ${ownerJid}`);
-                // Opsional: Bisa kasih tau user kalau dia bukan owner
-                // await sock.sendMessage(from, { text: '❌ _Kamu bukan owner bot!_' }, { quoted: message });
+            if (!isOwner) {
+                await sock.sendMessage(from, { 
+                    text: '❌ _Maaf, perintah ini hanya dapat digunakan oleh Owner bot!_' 
+                }, { quoted: message });
+                console.log(`⚠️ Percobaan .start/.stop ditolak. Sender: ${sender}`);
                 return; 
             }
 
@@ -51,7 +54,7 @@ async function handleCommand(sock, message) {
                     text: '✅ _Bot telah diaktifkan! Silakan gunakan command seperti biasa._'
                 }, { quoted: message });
                 console.log('✅ Bot activated by owner');
-                return; // Stop eksekusi di sini
+                return; 
             }
 
             if (textLower === '.stop') {
@@ -60,11 +63,21 @@ async function handleCommand(sock, message) {
                     text: '⏸️ _Bot telah dinonaktifkan (pause mode)._ \n_Hanya owner yang bisa menggunakan `.start` untuk mengaktifkannya kembali._'
                 }, { quoted: message });
                 console.log('⏸️ Bot deactivated by owner');
-                return; // Stop eksekusi di sini
+                return; 
             }
         }
 
-        // 3. CEK STATUS BOT (Jika mati, abaikan semua command di bawah ini)
+        // ==========================================
+        // 2. PENGECUALIAN: .p / .ping (Bisa dipakai kapan saja)
+        // ==========================================
+        if (textLower === '.p' || textLower === '.ping') {
+            await handlePing(sock, from, message);
+            return; // Langsung return agar tidak terblokir oleh pengecekan isBotActive di bawah
+        }
+
+        // ==========================================
+        // 3. CEK STATUS BOT (Jika mati, abaikan semua command lainnya)
+        // ==========================================
         if (!isBotActive) {
             return; 
         }
@@ -78,9 +91,8 @@ async function handleCommand(sock, message) {
         const hasVideo = !!message.message?.videoMessage;
 
         // ==========================================
-        // 4. ROUTING COMMANDS
+        // 4. ROUTING COMMANDS (Hanya jalan jika isBotActive === true)
         // ==========================================
-        
         if (textLower === '.s' || textLower === '.stiker') {
             await handleSticker(sock, from, message, textLower, isQuoted, quotedType, quotedMessage, hasImage, hasVideo);
         }
@@ -93,13 +105,9 @@ async function handleCommand(sock, message) {
         else if (textLower === '.tagall') {
             await handleTagAll(sock, from, message, rawText, isGroup, isQuoted, quotedMessage);
         }
-        else if (textLower === '.p' || textLower === '.ping') {
-            await handlePing(sock, from, message);
-        }
         else if (textLower === '.l' || textLower === '.list') {
             await handleList(sock, from, message);
         }
-        // 5. FITUR KHUSUS GRUP: .me dan .profile
         else if (textLower === '.me' || textLower.startsWith('.profile')) {
             if (!isGroup) {
                 await sock.sendMessage(from, { 

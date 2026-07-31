@@ -2,12 +2,17 @@ const fs = require('fs');
 const path = require('path');
 const settings = require('../config/settings');
 
-async function handlePing(sock, from, message) {
+async function handlePing(sock, from, message, isBotActive) {
     const botImagePath = path.join(__dirname, '../bronya.jpg');
+
+    // Tentukan status berdasarkan isBotActive
+    const statusText = isBotActive
+        ? "✅ *Status:* Online"
+        : "⏸️ *Status:* Paused / Offline";
 
     const caption = `🤖 *${settings.BOT_NAME}*
 
-✅ *Status:* Online
+${statusText}
 ⚡ *Response Time:* ${(Date.now() - message.messageTimestamp * 1000).toFixed(0)}ms
 
 ━━━━━━━━━━━━━━━━━━━━━
