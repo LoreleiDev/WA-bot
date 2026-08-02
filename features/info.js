@@ -47,8 +47,9 @@ async function handleList(sock, from, message) {
 │ 👁️ *VIEW ONCE EXTRACTOR*
 ├─────────────────────
 │ • *.nvo*
-│   └ Extract pesan view once
-│   └ Reply pesan view once dengan .nvo
+│   └ Extract pesan view once (sekali lihat)
+│   └ Wajib reply pesan view once dulu
+│   └ Support: image, video, audio, doc, sticker
 │
 ╭─────────────────────
 │ 📝 *CATATAN PRIBADI*

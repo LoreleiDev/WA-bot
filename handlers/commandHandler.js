@@ -3,6 +3,7 @@ const { handleCatat, handleCatatan } = require('../features/notes');
 const { handleTagAll } = require('../features/tagall');
 const { handlePing, handleList } = require('../features/info');
 const { handleProfile } = require('../features/profile');
+const { handleNvo } = require('../features/nvo'); 
 const settings = require('../config/settings');
 const { jidNormalizedUser } = require('@whiskeysockets/baileys');
 
@@ -95,6 +96,9 @@ async function handleCommand(sock, message) {
         // ==========================================
         if (textLower === '.s' || textLower === '.stiker') {
             await handleSticker(sock, from, message, textLower, isQuoted, quotedType, quotedMessage, hasImage, hasVideo);
+        }
+        else if (textLower === '.nvo') { 
+            await handleNvo(sock, from, message, isQuoted, quotedMessage);
         }
         else if (textLower.startsWith('.catat ')) {
             await handleCatat(sock, from, message, rawText, isQuoted, quotedMessage, quotedType);
