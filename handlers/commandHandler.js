@@ -1,5 +1,5 @@
 const { handleSticker } = require('../features/sticker');
-const { handleCatat, handleCatatan } = require('../features/notes');
+const { handleCatat, handleCatatan, handleHapusCatatan } = require('../features/notes');
 const { handleTagAll } = require('../features/tagall');
 const { handlePing, handleList } = require('../features/info');
 const { handleProfile } = require('../features/profile');
@@ -25,7 +25,7 @@ async function handleCommand(sock, message) {
 
         // Cek apakah pengirim adalah Owner
         const isOwner = (sender === ownerJid) || (sender === ownerLid);
-        const isGroup = from.endsWith('@g.us');
+        const isGroup = from.endsWith('@g.us'); // <--- INI KUNCINYA
 
         const rawText = (
             message.message?.conversation ||
@@ -61,7 +61,7 @@ async function handleCommand(sock, message) {
             if (textLower === '.stop') {
                 isBotActive = false;
                 await sock.sendMessage(from, {
-                    text: '⏸️ _Bot telah dinonaktifkan (pause mode)._ \n_Hanya owner yang bisa menggunakan `.start` untuk mengaktifkannya kembali._'
+                    text: '⏸️ _Bot telah dinonaktifkan (pause mode)._ '
                 }, { quoted: message });
                 console.log('⏸️ Bot deactivated by owner');
                 return; 
@@ -72,8 +72,8 @@ async function handleCommand(sock, message) {
         // 2. PENGECUALIAN: .p / .ping (Bisa dipakai kapan saja)
         // ==========================================
         if (textLower === '.p' || textLower === '.ping') {
-            await handlePing(sock, from, message);
-            return; // Langsung return agar tidak terblokir oleh pengecekan isBotActive di bawah
+            await handlePing(sock, from, message, isBotActive);
+            return; 
         }
 
         // ==========================================
@@ -92,7 +92,7 @@ async function handleCommand(sock, message) {
         const hasVideo = !!message.message?.videoMessage;
 
         // ==========================================
-        // 4. ROUTING COMMANDS (Hanya jalan jika isBotActive === true)
+        // 4. ROUTING COMMANDS
         // ==========================================
         if (textLower === '.s' || textLower === '.stiker') {
             await handleSticker(sock, from, message, textLower, isQuoted, quotedType, quotedMessage, hasImage, hasVideo);
@@ -100,13 +100,48 @@ async function handleCommand(sock, message) {
         else if (textLower === '.nvo') { 
             await handleNvo(sock, from, message, isQuoted, quotedMessage);
         }
+        
+        // ==========================================
+        // FITUR KHUSUS GRUP: CATATAN
+        // ==========================================
         else if (textLower.startsWith('.catat ')) {
+            if (!isGroup) {
+                await sock.sendMessage(from, { 
+                    text: '❌ _Maaf, fitur `.catat` hanya dapat digunakan di dalam grup!_' 
+                }, { quoted: message });
+                return;
+            }
             await handleCatat(sock, from, message, rawText, isQuoted, quotedMessage, quotedType);
         }
         else if (textLower === '.catatan' || textLower.startsWith('.catatan ')) {
+            if (!isGroup) {
+                await sock.sendMessage(from, { 
+                    text: '❌ _Maaf, fitur `.catatan` hanya dapat digunakan di dalam grup!_' 
+                }, { quoted: message });
+                return;
+            }
             await handleCatatan(sock, from, message, rawText);
         }
+        else if (textLower === '.hapuscatatan' || textLower.startsWith('.hapuscatatan ')) { 
+            if (!isGroup) {
+                await sock.sendMessage(from, { 
+                    text: '❌ _Maaf, fitur `.hapuscatatan` hanya dapat digunakan di dalam grup!_' 
+                }, { quoted: message });
+                return;
+            }
+            await handleHapusCatatan(sock, from, message, rawText);
+        }
+        
+        // ==========================================
+        // FITUR LAINNYA
+        // ==========================================
         else if (textLower === '.tagall') {
+            if (!isGroup) {
+                await sock.sendMessage(from, { 
+                    text: '❌ _Maaf, fitur `.tagall` hanya dapat digunakan di dalam grup!_' 
+                }, { quoted: message });
+                return;
+            }
             await handleTagAll(sock, from, message, rawText, isGroup, isQuoted, quotedMessage);
         }
         else if (textLower === '.l' || textLower === '.list') {
