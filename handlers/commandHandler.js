@@ -3,7 +3,8 @@ const { handleCatat, handleCatatan, handleHapusCatatan } = require('../features/
 const { handleTagAll } = require('../features/tagall');
 const { handlePing, handleList } = require('../features/info');
 const { handleProfile } = require('../features/profile');
-const { handleNvo } = require('../features/nvo'); 
+const { handleNvo } = require('../features/nvo');
+const { handleConvert } = require('../features/converter');
 const settings = require('../config/settings');
 const { jidNormalizedUser } = require('@whiskeysockets/baileys');
 
@@ -15,10 +16,10 @@ async function handleCommand(sock, message) {
         if (message.key.fromMe) return;
 
         const from = message.key.remoteJid;
-        
+
         // Normalisasi JID pengirim
         const sender = jidNormalizedUser(message.key.participant || from);
-        
+
         // Normalisasi JID Owner (dari nomor HP dan dari LID)
         const ownerJid = jidNormalizedUser(settings.OWNER_JID);
         const ownerLid = settings.OWNER_LID ? jidNormalizedUser(settings.OWNER_LID) : null;
@@ -42,11 +43,11 @@ async function handleCommand(sock, message) {
         // ==========================================
         if (textLower === '.start' || textLower === '.stop') {
             if (!isOwner) {
-                await sock.sendMessage(from, { 
-                    text: '❌ _Maaf, perintah ini hanya dapat digunakan oleh Owner bot!_' 
+                await sock.sendMessage(from, {
+                    text: '❌ _Maaf, perintah ini hanya dapat digunakan oleh Owner bot!_'
                 }, { quoted: message });
                 console.log(`⚠️ Percobaan .start/.stop ditolak. Sender: ${sender}`);
-                return; 
+                return;
             }
 
             if (textLower === '.start') {
@@ -55,7 +56,7 @@ async function handleCommand(sock, message) {
                     text: '✅ _Bot telah diaktifkan! Silakan gunakan command seperti biasa._'
                 }, { quoted: message });
                 console.log('✅ Bot activated by owner');
-                return; 
+                return;
             }
 
             if (textLower === '.stop') {
@@ -64,7 +65,7 @@ async function handleCommand(sock, message) {
                     text: '⏸️ _Bot telah dinonaktifkan (pause mode)._ '
                 }, { quoted: message });
                 console.log('⏸️ Bot deactivated by owner');
-                return; 
+                return;
             }
         }
 
@@ -73,14 +74,14 @@ async function handleCommand(sock, message) {
         // ==========================================
         if (textLower === '.p' || textLower === '.ping') {
             await handlePing(sock, from, message, isBotActive);
-            return; 
+            return;
         }
 
         // ==========================================
         // 3. CEK STATUS BOT (Jika mati, abaikan semua command lainnya)
         // ==========================================
         if (!isBotActive) {
-            return; 
+            return;
         }
 
         const contextInfo = message.message?.extendedTextMessage?.contextInfo;
@@ -97,17 +98,17 @@ async function handleCommand(sock, message) {
         if (textLower === '.s' || textLower === '.stiker') {
             await handleSticker(sock, from, message, textLower, isQuoted, quotedType, quotedMessage, hasImage, hasVideo);
         }
-        else if (textLower === '.nvo') { 
+        else if (textLower === '.nvo') {
             await handleNvo(sock, from, message, isQuoted, quotedMessage);
         }
-        
+
         // ==========================================
         // FITUR KHUSUS GRUP: CATATAN
         // ==========================================
         else if (textLower.startsWith('.catat ')) {
             if (!isGroup) {
-                await sock.sendMessage(from, { 
-                    text: '❌ _Maaf, fitur `.catat` hanya dapat digunakan di dalam grup!_' 
+                await sock.sendMessage(from, {
+                    text: '❌ _Maaf, fitur `.catat` hanya dapat digunakan di dalam grup!_'
                 }, { quoted: message });
                 return;
             }
@@ -115,30 +116,30 @@ async function handleCommand(sock, message) {
         }
         else if (textLower === '.catatan' || textLower.startsWith('.catatan ')) {
             if (!isGroup) {
-                await sock.sendMessage(from, { 
-                    text: '❌ _Maaf, fitur `.catatan` hanya dapat digunakan di dalam grup!_' 
+                await sock.sendMessage(from, {
+                    text: '❌ _Maaf, fitur `.catatan` hanya dapat digunakan di dalam grup!_'
                 }, { quoted: message });
                 return;
             }
             await handleCatatan(sock, from, message, rawText);
         }
-        else if (textLower === '.hapuscatatan' || textLower.startsWith('.hapuscatatan ')) { 
+        else if (textLower === '.hapuscatatan' || textLower.startsWith('.hapuscatatan ')) {
             if (!isGroup) {
-                await sock.sendMessage(from, { 
-                    text: '❌ _Maaf, fitur `.hapuscatatan` hanya dapat digunakan di dalam grup!_' 
+                await sock.sendMessage(from, {
+                    text: '❌ _Maaf, fitur `.hapuscatatan` hanya dapat digunakan di dalam grup!_'
                 }, { quoted: message });
                 return;
             }
             await handleHapusCatatan(sock, from, message, rawText);
         }
-        
+
         // ==========================================
         // FITUR LAINNYA
         // ==========================================
         else if (textLower === '.tagall') {
             if (!isGroup) {
-                await sock.sendMessage(from, { 
-                    text: '❌ _Maaf, fitur `.tagall` hanya dapat digunakan di dalam grup!_' 
+                await sock.sendMessage(from, {
+                    text: '❌ _Maaf, fitur `.tagall` hanya dapat digunakan di dalam grup!_'
                 }, { quoted: message });
                 return;
             }
@@ -149,12 +150,15 @@ async function handleCommand(sock, message) {
         }
         else if (textLower === '.me' || textLower.startsWith('.profile')) {
             if (!isGroup) {
-                await sock.sendMessage(from, { 
-                    text: '❌ _Maaf, fitur `.me` dan `.profile` hanya dapat digunakan di dalam grup!_' 
+                await sock.sendMessage(from, {
+                    text: '❌ _Maaf, fitur `.me` dan `.profile` hanya dapat digunakan di dalam grup!_'
                 }, { quoted: message });
                 return;
             }
             await handleProfile(sock, from, message, textLower, isGroup, mentionedJid);
+        } 
+        else if (textLower === '.topdf') {
+            await handleConvert(sock, from, message, rawText, isQuoted, quotedMessage, quotedType);
         }
 
     } catch (err) {

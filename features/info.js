@@ -19,7 +19,7 @@ ${statusText}
 
 👨‍💻 *Creator:* ${settings.CREATOR}
 🔗 *GitHub:* ${settings.GITHUB}
-💬 *Discord:* ${settings.DISCORD}
+💬 *Discord:* ${settings.DISCORDC}
 
 ${createFooter()}`;
 
@@ -52,21 +52,6 @@ async function handleList(sock, from, message) {
 │   └ Support: image, video, audio, doc, sticker
 │
 ╭─────────────────────
-│ 📝 *CATATAN PRIBADI*
-├─────────────────────
-│ • *.catat <judul>*
-│   └ Simpan pesan yang di-reply
-│   └ Wajib menyertakan judul
-│   └ Contoh: .catat resep masakan
-│
-│ • *.catatan*
-│   └ Lihat daftar semua judul catatanmu
-│
-│ • *.catatan <judul>*
-│   └ Lihat isi catatan spesifik
-│   └ Contoh: .catatan resep masakan
-│
-╭─────────────────────
 │ 📢 *GRUP & INTERAKSI*
 ├─────────────────────
 │ • *.tagall*
@@ -78,6 +63,25 @@ async function handleList(sock, from, message) {
 │
 │ • *.profile @user*
 │   └ Lihat info profil user lain
+│
+╭─────────────────────
+│ 📝 *CATATAN GRUP*
+├─────────────────────
+│ • *.catat <judul>*
+│   └ Simpan pesan yang di-reply ke grup
+│   └ Wajib menyertakan judul
+│   └ Contoh: .catat jadwal rapat
+│
+│ • *.catatan*
+│   └ Lihat daftar semua judul catatan di grup
+│
+│ • *.catatan <judul>*
+│   └ Lihat isi catatan spesifik
+│   └ Contoh: .catatan jadwal rapat
+│
+│ • *.hapuscatatan <judul>*
+│   └ Hapus catatan dari grup
+│   └ Contoh: .hapuscatatan jadwal rapat
 │
 ╭─────────────────────
 │ 📡 *STATUS BOT*
