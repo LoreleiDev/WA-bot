@@ -2,5 +2,6 @@ allowBuilds:
   '@whiskeysockets/baileys': true
   ffmpeg-static: true
   protobufjs: false
+  puppeteer: false
   sharp: true
   youtube-dl-exec: true

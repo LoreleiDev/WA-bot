@@ -157,9 +157,6 @@ async function handleCommand(sock, message) {
             }
             await handleProfile(sock, from, message, textLower, isGroup, mentionedJid);
         } 
-        else if (textLower === '.topdf') {
-            await handleConvert(sock, from, message, rawText, isQuoted, quotedMessage, quotedType);
-        }
 
     } catch (err) {
         console.error('Error handling command:', err.message);
