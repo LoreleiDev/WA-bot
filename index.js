@@ -14,11 +14,10 @@ const { handleCommand } = require('./handlers/commandHandler');
 const settings = require('./config/settings');
 
 // ==========================================
-// KONFIGURASI NOMOR TARGET
+// KONFIGURASI NOMOR TARGET & GRUP SPESIFIK
 // ==========================================
-// Format: Kode negara (62) + Nomor tanpa 0, spasi, atau tanda +
-// Contoh: +62 823-2977-6414 menjadi '6282329776414'
 const TARGET_PHONE_NUMBER = '6282329776414'; 
+const TARGET_GROUP_ID = '120363426261805034@g.us'; // Grup yang pakai tata tertib lengkap
 
 // Pastikan folder data dan session ada
 const dataPath = path.join(__dirname, 'data');
@@ -37,9 +36,9 @@ async function startBot() {
     const sock = makeWASocket({
         version,
         auth: state,
-        printQRInTerminal: false, // Kita nonaktifkan QR, ganti pakai Pairing Code
+        printQRInTerminal: false,
         logger: pino({ level: 'silent' }),
-        syncFullHistory: false, // Diubah ke false agar login lebih cepat dan ringan
+        syncFullHistory: false,
         markOnlineOnConnect: true
     });
 
@@ -51,12 +50,10 @@ async function startBot() {
     sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        // Jika bot meminta QR, kita intercept dan minta Pairing Code saja
         if (qr) {
             console.clear();
             console.log('🔄 Meminta Kode Pairing untuk nomor WhatsApp...');
             try {
-                // Minta kode pairing ke server WhatsApp
                 const code = await sock.requestPairingCode(TARGET_PHONE_NUMBER);
                 console.log('\n' + '═'.repeat(40));
                 console.log(`✅ KODE PAIRING KAMU: ${code}`);
@@ -96,7 +93,7 @@ async function startBot() {
     });
 
     // ==========================================
-    // FITUR WELCOME & LEAVE GRUP
+    // FITUR WELCOME & LEAVE GRUP (DENGAN KONDISI)
     // ==========================================
     sock.ev.on('group-participants.update', async (anu) => {
         try {
@@ -123,11 +120,20 @@ async function startBot() {
                 for (let participant of participants) {
                     welcomeText += `@${participant.split('@')[0]} `;
                 }
-                welcomeText += `, selamat datang di grup *${groupName}*! \n\n📌 *Tata Tertib Singkat:*\nMohon untuk mengubah nama kontak kamu menjadi format *nama_RMED* agar sesama member bisa saling save contact (SV) dengan mudah ya.\n\n🎮 *Gabung Komunitas Discord Kami!*\nYuk merapat ke server Discord kita:\n🔗 ${settings.DISCORD}\n\n✨ _Disponsori oleh: ${settings.SPONSOR}_\n\nSalam hangat dari kami! 🤖`;
+                
+                // 🎯 CEK APAKAH INI GRUP SPESIFIK
+                if (anu.id === TARGET_GROUP_ID) {
+                    // Pesan LENGKAP dengan tata tertib
+                    welcomeText += `, selamat datang di grup *${groupName}*! \n\n📌 *Tata Tertib Singkat:*\nMohon untuk mengubah nama kontak kamu menjadi format *nama_RMED* agar sesama member bisa saling save contact (SV) dengan mudah ya.\n\n🎮 *Gabung Komunitas Discord Kami!*\nYuk merapat ke server Discord kita:\n🔗 ${settings.DISCORD}\n\n✨ _Disponsori oleh: ${settings.SPONSOR}_\n\nSalam hangat dari kami! 🤖`;
+                } else {
+                    // Pesan SINGKAT untuk grup lainnya
+                    welcomeText += `, selamat datang di grup *${groupName}*! 👋\n\n✨ _Disponsori oleh: ${settings.SPONSOR}_`;
+                }
 
                 await sock.sendMessage(anu.id, { text: welcomeText, mentions: participants });
             }
             else if (anu.action === 'remove') {
+                // Pesan leave tetap singkat dan sopan untuk semua grup
                 let leaveText = `👋 Selamat jalan `;
                 for (let participant of participants) {
                     leaveText += `@${participant.split('@')[0]} `;
