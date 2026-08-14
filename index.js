@@ -8,13 +8,19 @@ const {
 
 const { Boom } = require('@hapi/boom');
 const pino = require('pino');
-const qrcode = require('qrcode-terminal');
 const path = require('path');
 const fs = require('fs');
 const { handleCommand } = require('./handlers/commandHandler');
 const settings = require('./config/settings');
 
-// Pastikan folder data ada
+// ==========================================
+// KONFIGURASI NOMOR TARGET
+// ==========================================
+// Format: Kode negara (62) + Nomor tanpa 0, spasi, atau tanda +
+// Contoh: +62 823-2977-6414 menjadi '6282329776414'
+const TARGET_PHONE_NUMBER = '6282329776414'; 
+
+// Pastikan folder data dan session ada
 const dataPath = path.join(__dirname, 'data');
 if (!fs.existsSync(dataPath)) {
     fs.mkdirSync(dataPath);
@@ -31,25 +37,39 @@ async function startBot() {
     const sock = makeWASocket({
         version,
         auth: state,
-        printQRInTerminal: false,
+        printQRInTerminal: false, // Kita nonaktifkan QR, ganti pakai Pairing Code
         logger: pino({ level: 'silent' }),
-        syncFullHistory: true,
+        syncFullHistory: false, // Diubah ke false agar login lebih cepat dan ringan
         markOnlineOnConnect: true
     });
 
     sock.ev.on('creds.update', saveCreds);
 
     // ==========================================
-    // KONEKSI & QR CODE
+    // KONEKSI & PAIRING CODE
     // ==========================================
     sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
+        // Jika bot meminta QR, kita intercept dan minta Pairing Code saja
         if (qr) {
             console.clear();
-            console.log('📱 Scan QR Code berikut menggunakan WhatsApp:\n');
-            qrcode.generate(qr, { small: true });
-            console.log('\nWhatsApp → Perangkat Tertaut → Tautkan Perangkat');
+            console.log('🔄 Meminta Kode Pairing untuk nomor WhatsApp...');
+            try {
+                // Minta kode pairing ke server WhatsApp
+                const code = await sock.requestPairingCode(TARGET_PHONE_NUMBER);
+                console.log('\n' + '═'.repeat(40));
+                console.log(`✅ KODE PAIRING KAMU: ${code}`);
+                console.log('═'.repeat(40));
+                console.log('\n📱 Cara Tautkan:');
+                console.log('1. Buka WhatsApp di HP (nomor target)');
+                console.log('2. Pengaturan > Perangkat Tertaut > Tautkan Perangkat');
+                console.log('3. Pilih "Tautkan dengan nomor telepon" (bukan scan QR)');
+                console.log(`4. Masukkan kode: ${code}`);
+                console.log('\n⏳ Menunggu koneksi...\n');
+            } catch (err) {
+                console.error('❌ Gagal meminta kode pairing:', err.message);
+            }
         }
 
         if (connection === 'connecting') {
@@ -58,15 +78,15 @@ async function startBot() {
 
         if (connection === 'open') {
             console.clear();
-            console.log(`✅ ${settings.BOT_NAME} berhasil online dan terhubung!`);
-            console.log(`👤 Owner: ${settings.OWNER_JID.split('@')[0]}`);
+            console.log(`✅ ${settings.BOT_NAME || 'Bot'} berhasil online dan terhubung!`);
+            console.log(`👤 Terhubung ke: ${TARGET_PHONE_NUMBER}`);
             console.log(`✨ Ready to serve!`);
         }
 
         if (connection === 'close') {
             const statusCode = new Boom(lastDisconnect?.error)?.output?.statusCode;
             if (statusCode === DisconnectReason.loggedOut) {
-                console.log('❌ Perangkat logout. Hapus folder "session" lalu jalankan ulang.');
+                console.log('❌ Perangkat logout. Hapus folder "session" lalu jalankan ulang untuk pairing ulang.');
                 process.exit();
             } else {
                 console.log('🔄 Koneksi terputus, reconnect dalam 5 detik...');
@@ -108,7 +128,7 @@ async function startBot() {
                 await sock.sendMessage(anu.id, { text: welcomeText, mentions: participants });
             }
             else if (anu.action === 'remove') {
-                let leaveText = ` Selamat jalan `;
+                let leaveText = `👋 Selamat jalan `;
                 for (let participant of participants) {
                     leaveText += `@${participant.split('@')[0]} `;
                 }

@@ -272,7 +272,6 @@ async function handleCatatan(sock, from, message, text) {
             try {
                 let fileBuffer;
 
-                // 🛠️ PERBAIKAN DOWNLOAD: Gunakan GetObjectCommand untuk R2, Axios untuk Cloudinary/Catbox
                 if (targetNote.provider === 'Cloudflare R2') {
                     console.log(`[RETRIEVE] Mengambil file dari R2 menggunakan S3 API: ${targetNote.publicId}`);
                     const command = new GetObjectCommand({
