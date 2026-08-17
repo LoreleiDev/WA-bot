@@ -4,7 +4,6 @@ const { handleTagAll } = require('../features/tagall');
 const { handlePing, handleList } = require('../features/info');
 const { handleProfile } = require('../features/profile');
 const { handleNvo } = require('../features/nvo');
-const { handleConvert } = require('../features/converter');
 const settings = require('../config/settings');
 const { jidNormalizedUser } = require('@whiskeysockets/baileys');
 
@@ -91,12 +90,24 @@ async function handleCommand(sock, message) {
         const mentionedJid = contextInfo?.mentionedJid;
         const hasImage = !!message.message?.imageMessage;
         const hasVideo = !!message.message?.videoMessage;
+        
+        // ==========================================
+        // HELPER: Pembungkus Antrian (Queue Task)
+        // ==========================================
+        const createTask = (executeFn) => ({
+            run: executeFn,
+            onQueued: async () => {
+                await sock.sendMessage(from, { 
+                    text: '⏳ _Permintaanmu sedang di antrian, sedang diproses... mohon tunggu._' 
+                }, { quoted: message });
+            }
+        });
 
         // ==========================================
         // 4. ROUTING COMMANDS
         // ==========================================
         if (textLower === '.s' || textLower === '.stiker') {
-            await handleSticker(sock, from, message, textLower, isQuoted, quotedType, quotedMessage, hasImage, hasVideo);
+            await enqueue(sender, createTask(() => handleSticker(sock, from, message, textLower, isQuoted, quotedType, quotedMessage, hasImage, hasVideo)));
         }
         else if (textLower === '.nvo') {
             await handleNvo(sock, from, message, isQuoted, quotedMessage);
@@ -107,30 +118,24 @@ async function handleCommand(sock, message) {
         // ==========================================
         else if (textLower.startsWith('.catat ')) {
             if (!isGroup) {
-                await sock.sendMessage(from, {
-                    text: '❌ _Maaf, fitur `.catat` hanya dapat digunakan di dalam grup!_'
-                }, { quoted: message });
+                await sock.sendMessage(from, { text: '❌ _Maaf, fitur `.catat` hanya dapat digunakan di dalam grup!_' }, { quoted: message });
                 return;
             }
-            await handleCatat(sock, from, message, rawText, isQuoted, quotedMessage, quotedType);
+            await enqueue(sender, createTask(() => handleCatat(sock, from, message, rawText, isQuoted, quotedMessage, quotedType)));
         }
         else if (textLower === '.catatan' || textLower.startsWith('.catatan ')) {
             if (!isGroup) {
-                await sock.sendMessage(from, {
-                    text: '❌ _Maaf, fitur `.catatan` hanya dapat digunakan di dalam grup!_'
-                }, { quoted: message });
+                await sock.sendMessage(from, { text: '❌ _Maaf, fitur `.catatan` hanya dapat digunakan di dalam grup!_' }, { quoted: message });
                 return;
             }
-            await handleCatatan(sock, from, message, rawText);
+            await enqueue(sender, createTask(() => handleCatatan(sock, from, message, rawText)));
         }
-        else if (textLower === '.hapuscatatan' || textLower.startsWith('.hapuscatatan ')) {
+        else if (textLower === '.hapuscatatan' || textLower.startsWith('.hapuscatatan ')) { 
             if (!isGroup) {
-                await sock.sendMessage(from, {
-                    text: '❌ _Maaf, fitur `.hapuscatatan` hanya dapat digunakan di dalam grup!_'
-                }, { quoted: message });
+                await sock.sendMessage(from, { text: '❌ _Maaf, fitur `.hapuscatatan` hanya dapat digunakan di dalam grup!_' }, { quoted: message });
                 return;
             }
-            await handleHapusCatatan(sock, from, message, rawText);
+            await enqueue(sender, createTask(() => handleHapusCatatan(sock, from, message, rawText)));
         }
 
         // ==========================================
@@ -159,7 +164,11 @@ async function handleCommand(sock, message) {
         } 
 
     } catch (err) {
-        console.error('Error handling command:', err.message);
+        if (err.message === 'FLOOD_DETECTED') {
+            await sock.sendMessage(from, { text: '⚠️ _Kamu mengirim command terlalu cepat, mohon tunggu 10 detik._' }, { quoted: message });
+        } else {
+            console.error('Error handling command:', err.message);
+        }
     }
 }
 

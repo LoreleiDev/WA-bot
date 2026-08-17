@@ -16,7 +16,7 @@ const settings = require('./config/settings');
 // ==========================================
 // KONFIGURASI NOMOR TARGET & GRUP SPESIFIK
 // ==========================================
-const TARGET_PHONE_NUMBER = '6282329776414'; 
+const TARGET_PHONE_NUMBER = '6287771499027'; 
 const TARGET_GROUP_ID = '120363426261805034@g.us'; // Grup yang pakai tata tertib lengkap
 
 // Pastikan folder data dan session ada

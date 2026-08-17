@@ -1,20 +1,11 @@
 const fs = require('fs/promises');
 const path = require('path');
 const { downloadContentFromMessage } = require('@whiskeysockets/baileys');
-const { setProcessing, isProcessing } = require('../utils/antiSpam');
 const settings = require('../config/settings');
-const cloudinary = require('cloudinary').v2;
-const axios = require('axios');
+const axios = require('axios'); // Tetap ada untuk fallback download file lama jika perlu
 
-// Import AWS SDK untuk Cloudflare R2
+// Import AWS SDK khusus untuk Cloudflare R2
 const { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
-
-// Konfigurasi Cloudinary 
-cloudinary.config({
-    cloud_name: settings.CLOUDINARY_CLOUD_NAME,
-    api_key: settings.CLOUDINARY_API_KEY,
-    api_secret: settings.CLOUDINARY_API_SECRET
-});
 
 // Konfigurasi Cloudflare R2 Client
 const r2Client = new S3Client({
@@ -42,11 +33,10 @@ async function saveNotes(notes) {
 }
 
 // ==========================================
-// FUNGSI UPLOAD KE CLOUDFLARE R2 
+// FUNGSI UPLOAD KE CLOUDFLARE R2 (100% UNTUK SEMUA FILE BARU)
 // ==========================================
 async function uploadToR2(buffer, fileName, mimetype) {
     try {
-        // Tambahkan timestamp agar nama file unik dan tidak saling overwrite
         const uniqueKey = `${Date.now()}_${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
 
         console.log(`[UPLOAD] Mengupload ke Cloudflare R2: ${uniqueKey} (${(buffer.length / 1024 / 1024).toFixed(2)} MB)`);
@@ -79,19 +69,12 @@ async function uploadToR2(buffer, fileName, mimetype) {
 async function handleCatat(sock, from, message, text, isQuoted, quotedMessage, quotedType) {
     const isGroup = from.endsWith('@g.us');
     if (!isGroup) {
-        await sock.sendMessage(from, { text: ' _Fitur catatan hanya dapat digunakan di dalam grup!_' }, { quoted: message });
+        await sock.sendMessage(from, { text: '❌ _Fitur catatan hanya dapat digunakan di dalam grup!_' }, { quoted: message });
         return;
     }
 
     const sender = message.key.participant || from;
     const groupId = from;
-
-    if (isProcessing(sender)) {
-        await sock.sendMessage(from, { text: '⚠️ _Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu._' }, { quoted: message });
-        return;
-    }
-
-    setProcessing(sender);
 
     try {
         const args = text.split(' ');
@@ -159,6 +142,7 @@ async function handleCatat(sock, from, message, text, isQuoted, quotedMessage, q
 
             console.log(`[UPLOAD] Download complete. Buffer size: ${(buffer.length / 1024 / 1024).toFixed(2)} MB`);
 
+            // 100% UPLOAD KE R2
             const uploadResult = await uploadToR2(buffer, fileName, mimetype);
 
             if (!uploadResult || !uploadResult.url || !uploadResult.provider) {
@@ -169,7 +153,7 @@ async function handleCatat(sock, from, message, text, isQuoted, quotedMessage, q
             noteContent.fileName = fileName;
             noteContent.mimetype = mimetype;
             noteContent.caption = mediaMessage.caption || '';
-            noteContent.fileUrl = uploadResult.url; // Menyimpan Key R2
+            noteContent.fileUrl = uploadResult.url;
             noteContent.provider = uploadResult.provider;
             noteContent.publicId = uploadResult.publicId;
         }
@@ -178,14 +162,12 @@ async function handleCatat(sock, from, message, text, isQuoted, quotedMessage, q
         await saveNotes(notes);
         console.log(`✅ [SUCCESS] Catatan "${title}" berhasil disimpan ke notes.json`);
 
-        const typeEmoji = { text: '📝', image: '📷', video: '🎥', document: '', audio: '🎵' };
-        await sock.sendMessage(from, { text: `✅ ${typeEmoji[noteContent.type]} _Catatan "*${title}*" berhasil disimpan di Cloud!_` }, { quoted: message });
+        const typeEmoji = { text: '📝', image: '📷', video: '🎥', document: '📄', audio: '🎵' };
+        await sock.sendMessage(from, { text: `✅ _${typeEmoji[noteContent.type]} Catatan "*${title}*" berhasil disimpan di Cloud!_` }, { quoted: message });
 
     } catch (err) {
         console.error('❌ ERROR SAAT MENYIMPAN CATATAN:', err);
         await sock.sendMessage(from, { text: `❌ _Gagal menyimpan catatan._\n\n_Error: ${err.message}_` }, { quoted: message });
-    } finally {
-        setProcessing(sender, false);
     }
 }
 
@@ -202,13 +184,6 @@ async function handleCatatan(sock, from, message, text) {
     const sender = message.key.participant || from;
     const groupId = from;
 
-    if (isProcessing(sender)) {
-        await sock.sendMessage(from, { text: '⚠️ _Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu._' }, { quoted: message });
-        return;
-    }
-
-    setProcessing(sender);
-
     try {
         const notes = await loadNotes();
         const groupNotes = notes[groupId] || [];
@@ -224,7 +199,7 @@ async function handleCatatan(sock, from, message, text) {
         if (!searchTitle) {
             let listText = `📚 *DAFTAR CATATAN GRUP*\n_Total: ${groupNotes.length} catatan_\n\n`;
             groupNotes.forEach((note, index) => {
-                const emoji = { text: '📝', image: '📷', video: '🎥', document: '📄', audio: '' }[note.type] || '';
+                const emoji = { text: '📝', image: '📷', video: '🎥', document: '📄', audio: '🎵' }[note.type] || '📌';
                 const date = new Date(note.timestamp).toLocaleDateString('id-ID');
                 listText += `${index + 1}. ${emoji} *${note.title}*\n   └ 📅 ${date}\n`;
             });
@@ -239,22 +214,20 @@ async function handleCatatan(sock, from, message, text) {
             return;
         }
 
-        // Validasi data korup (hanya untuk non-text)
         if (targetNote.type !== 'text' && (!targetNote.fileUrl || targetNote.fileUrl === 'undefined' || !targetNote.provider)) {
             await sock.sendMessage(from, { text: `❌ _Data catatan "*${searchTitle}*" rusak/korup. Silakan hapus dan buat ulang._` }, { quoted: message });
             return;
         }
 
         const date = new Date(targetNote.timestamp).toLocaleString('id-ID');
-        let displayCaption = `📌 *JUDUL:* ${targetNote.title}\n📅 *DISIMPAN:* ${date}\n`;
+        let displayCaption = `📌 *JUDUL:* ${targetNote.title}\n📅 *DISIMPAN:* ${date}\n━━━━━━━━━━━━━━━━━\n`;
 
-        if (targetNote.type === 'image') displayCaption += `📷 *Tipe:* Gambar\n━━━━━━━━━━━━━━━━━\n`;
-        else if (targetNote.type === 'video') displayCaption += ` *Tipe:* Video\n━━━━━━━━━━━━━━━━━\n`;
-        else if (targetNote.type === 'document') displayCaption += `📄 *Tipe:* Dokumen\n━━━━━━━━━━━━━━━━━\n`;
-        else if (targetNote.type === 'audio') displayCaption += `🎵 *Tipe:* Audio\n━━━━━━━━━━━━━━━━━\n`;
-        else if (targetNote.type === 'text') displayCaption += `📝 *Tipe:* Teks\n━━━━━━━━━━━━━━━━━\n`;
+        if (targetNote.type === 'image') displayCaption += `📷 *Tipe:* Gambar\n`;
+        else if (targetNote.type === 'video') displayCaption += `🎥 *Tipe:* Video\n`;
+        else if (targetNote.type === 'document') displayCaption += `📄 *Tipe:* Dokumen\n`;
+        else if (targetNote.type === 'audio') displayCaption += `🎵 *Tipe:* Audio\n`;
+        else if (targetNote.type === 'text') displayCaption += `📝 *Tipe:* Teks\n`;
 
-        // Tampilkan provider HANYA jika ada (untuk file, bukan text)
         if (targetNote.provider && targetNote.type !== 'text') {
             displayCaption += `☁️ *Provider:* ${targetNote.provider}\n`;
         }
@@ -264,7 +237,6 @@ async function handleCatatan(sock, from, message, text) {
         }
 
         if (targetNote.type === 'text') {
-            // Untuk text, langsung kirim tanpa "Permintaan sedang diproses"
             await sock.sendMessage(from, { text: `${displayCaption}\n${targetNote.content}` }, { quoted: message });
         } else {
             await sock.sendMessage(from, { text: '⏳ _Permintaan sedang diproses..._' }, { quoted: message });
@@ -280,22 +252,21 @@ async function handleCatatan(sock, from, message, text) {
                     });
                     const response = await r2Client.send(command);
 
-                    // Mengubah Stream dari R2 menjadi Buffer
                     const chunks = [];
                     for await (const chunk of response.Body) {
                         chunks.push(chunk);
                     }
                     fileBuffer = Buffer.concat(chunks);
                 } else {
-                    // Fallback untuk file lama di Cloudinary / Catbox
-                    console.log(`[RETRIEVE] Mengambil file dari ${targetNote.provider}: ${targetNote.fileUrl}`);
+                    // Fallback aman untuk file sangat lama (jika ada yang tersisa di Cloudinary/Catbox)
+                    console.log(`[RETRIEVE] Mengambil file lama dari ${targetNote.provider}: ${targetNote.fileUrl}`);
                     const response = await axios.get(targetNote.fileUrl, {
                         responseType: 'arraybuffer',
                         timeout: 120000,
                         maxContentLength: 100 * 1024 * 1024,
                         maxBodyLength: 100 * 1024 * 1024,
                         headers: {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                             'Accept': '*/*'
                         }
                     });
@@ -312,7 +283,7 @@ async function handleCatatan(sock, from, message, text) {
             } catch (downloadErr) {
                 console.error('[ERROR] Gagal download dari Cloud:', downloadErr.message);
                 const fallbackText = targetNote.provider === 'Cloudflare R2'
-                    ? `${displayCaption}\n\n️ _Gagal memuat file dari server._`
+                    ? `${displayCaption}\n\n⚠️ _Gagal memuat file dari server._`
                     : `${displayCaption}\n\n⚠️ _Gagal memuat file langsung. Silakan klik link:_\n🔗 ${targetNote.fileUrl}`;
 
                 await sock.sendMessage(from, { text: fallbackText }, { quoted: message });
@@ -321,8 +292,6 @@ async function handleCatatan(sock, from, message, text) {
     } catch (err) {
         console.error('Error fetching notes:', err);
         await sock.sendMessage(from, { text: `❌ _Gagal mengambil catatan._\n\n_Error: ${err.message}_` }, { quoted: message });
-    } finally {
-        setProcessing(sender, false);
     }
 }
 
@@ -338,13 +307,6 @@ async function handleHapusCatatan(sock, from, message, text) {
 
     const sender = message.key.participant || from;
     const groupId = from;
-
-    if (isProcessing(sender)) {
-        await sock.sendMessage(from, { text: '⚠️ _Kamu masih memiliki permintaan yang sedang diproses. Mohon tunggu._' }, { quoted: message });
-        return;
-    }
-
-    setProcessing(sender);
 
     try {
         const args = text.split(' ');
@@ -369,18 +331,7 @@ async function handleHapusCatatan(sock, from, message, text) {
 
         const deletedNote = notes[groupId].splice(noteIndex, 1)[0];
 
-        // Hapus dari Cloudinary (Untuk file lama)
-        if (deletedNote.provider === 'Cloudinary' && deletedNote.publicId) {
-            try {
-                const resType = deletedNote.resourceType || (deletedNote.type === 'document' ? 'raw' : 'image');
-                await cloudinary.uploader.destroy(deletedNote.publicId, { resource_type: resType });
-                console.log(`[CLEANUP] File dihapus dari Cloudinary: ${deletedNote.publicId}`);
-            } catch (e) {
-                console.warn('[CLEANUP] Gagal hapus dari Cloudinary:', e.message);
-            }
-        }
-
-        // Hapus dari Cloudflare R2
+        // 100% HAPUS DARI R2
         if (deletedNote.provider === 'Cloudflare R2' && deletedNote.publicId) {
             try {
                 const deleteCommand = new DeleteObjectCommand({
@@ -401,8 +352,6 @@ async function handleHapusCatatan(sock, from, message, text) {
     } catch (err) {
         console.error('Error deleting note:', err);
         await sock.sendMessage(from, { text: `❌ _Gagal menghapus catatan._\n\n_Error: ${err.message}_` }, { quoted: message });
-    } finally {
-        setProcessing(sender, false);
     }
 }
 

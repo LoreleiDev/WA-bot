@@ -1,260 +1,104 @@
 {
   "120363426261805034@g.us": [
     {
-      "id": 1785730663847,
-      "title": "issue buku saku PKKMB 2026",
-      "timestamp": "2026-08-03T04:17:43.847Z",
+      "id": 1786715257355,
+      "title": "twibbon garda",
+      "timestamp": "2026-08-14T13:47:37.355Z",
+      "type": "text",
+      "savedBy": "122497047466218@lid",
+      "content": "https://drive.google.com/drive/mobile/folders/1TeFh6gCekKeNfX8RBSdK3G3T2Gp4pGrO?usp=sharing"
+    },
+    {
+      "id": 1786715293890,
+      "title": "twibbon vokasi",
+      "timestamp": "2026-08-14T13:48:13.890Z",
+      "type": "image",
+      "savedBy": "122497047466218@lid",
+      "fileName": "image.jpg",
+      "mimetype": "image/jpeg",
+      "caption": "Halo, Voks!🤟🏻\n\nSebagai bentuk semangat menyambut PKKMB Batara Vokasi 2026, yuk ramaikan representasi kalian dengan memasang Twibbon resmi PKKMB Batara Vokasi 2026!\n\nDengan memasang twibbon ini, kalian turut menunjukkan antusiasme serta kebanggaan sebagai bagian dari keluarga besar Fakultas Vokasi UNESA, sekaligus membantu menyebarkan semangat PKKMB Batara Vokasi 2026 kepada teman-teman lainnya.\n\nLink twibbon dapat diakses sebagai berikut:\n\nhttps://unesa.me/TwibbonBatara Vokasi2026\n\nJangan lupa unggah di media sosial kalian dan tandai akun kami, yaa! Sampai jumpa di PKKMB Batara Vokasi 2026!",
+      "fileUrl": "1786715294128_image.jpg",
+      "provider": "Cloudflare R2",
+      "publicId": "1786715294128_image.jpg"
+    },
+    {
+      "id": 1786715418271,
+      "title": "tugas hint",
+      "timestamp": "2026-08-14T13:50:18.271Z",
       "type": "document",
-      "fileName": "Buku Saku PKKMB 2026 - All.pdf",
+      "savedBy": "122497047466218@lid",
+      "fileName": "Tugas Hint.pdf",
+      "mimetype": "application/pdf",
+      "caption": "Tugas Hint.pdf",
+      "fileUrl": "1786715418486_Tugas_Hint.pdf",
+      "provider": "Cloudflare R2",
+      "publicId": "1786715418486_Tugas_Hint.pdf"
+    },
+    {
+      "id": 1786718101826,
+      "title": "capt twibbon vokasi",
+      "timestamp": "2026-08-14T14:35:01.826Z",
+      "type": "text",
+      "savedBy": "122497047466218@lid",
+      "content": "https://docs.google.com/document/d/1-bPzgut0rCjnITLZKcidStb2ZYlIY7vmDCDFWRULXIs/edit?usp=drivesdk\n\nini ya teman-teman captionnya"
+    },
+    {
+      "id": 1786766966074,
+      "title": "guidebook batara vokasi",
+      "timestamp": "2026-08-15T04:09:26.074Z",
+      "type": "document",
+      "savedBy": "64299988951222@lid",
+      "fileName": "GUIDEBOOK BATARA VOKASI.pdf",
       "mimetype": "application/pdf",
       "caption": "",
-      "fileUrl": "https://files.catbox.moe/iak7tf.pdf",
-      "provider": "Catbox"
+      "fileUrl": "1786767177370_GUIDEBOOK_BATARA_VOKASI.pdf",
+      "provider": "Cloudflare R2",
+      "publicId": "1786767177370_GUIDEBOOK_BATARA_VOKASI.pdf"
     },
     {
-      "id": 1785806857676,
-      "title": "tutor akun sso",
-      "timestamp": "2026-08-04T01:27:37.676Z",
-      "type": "text",
-      "content": "Berikut langkah-langkah yang sudah dirapikan dan mudah diikuti:\n\n1. Buka PMB/Daful.\n2. Masuk ke menu Akun SSO.\n3. Catat informasi yang ditampilkan, seperti Email SSO, Password, dan NIM.\n4. Buka aplikasi Gmail di HP atau laptop.\n5. Ketuk foto profil di pojok kanan atas.\n6. Pilih Tambahkan akun lainnya.\n7. Pilih Google.\n8. Masukkan alamat email SSO yang ada di akun PMB/Daful, lalu klik Selanjutnya.\n9. Masukkan password SSO yang diberikan pada akun PMB/Daful, lalu klik Selanjutnya.\n10. Jika muncul halaman persetujuan, scroll ke bawah lalu pilih Setuju atau Berikutnya.\n11. Tunggu hingga proses penambahan akun selesai.\n12. Setelah selesai, buka kembali foto profil di aplikasi Gmail dan pastikan akun email SSO sudah berhasil ditambahkan.\n13. Buka browser, lalu masuk ke https://sso.unesa.ac.id.\n14. Klik Login SSO.\n15. Saat diarahkan ke halaman Google, pilih akun Gmail SSO yang baru saja ditambahkan.\n16. Selesai. Anda telah berhasil login ke akun SSO UNESA.\n\nMimin dpet info langkah\" nyaa"
-    },
-    {
-      "id": 1785918025571,
-      "title": "list basic ospek",
-      "timestamp": "2026-08-05T08:20:25.571Z",
-      "type": "text",
-      "savedBy": "71030806704156@lid",
-      "content": "List Pakaian \n- Kemeja Batik Berkerah\n- Rok A line sama Rok span hitam\n- Kemeja putih\n- Baju Putih abu\n- Celana Training Hitam\n- Kaos lengan panjang polos putih\n\nFoot Wear\n- Pantofel\n- Sepatu Olahraga\n- Kaos Kaki Hitam\n- Kaos Kaki Putih\n\nAtribut dasar  \n- Sabuk Hitam Polos\n- Pin Garuda - Bendera\n- Kopiah\n- Dasi Hitam\n- Dasi Abu"
-    },
-    {
-      "id": 1785938697500,
-      "title": "info kuota pkkmb1",
-      "timestamp": "2026-08-05T14:04:57.500Z",
-      "type": "text",
+      "id": 1786767303398,
+      "title": "guidebook garda",
+      "timestamp": "2026-08-15T04:15:03.398Z",
+      "type": "document",
       "savedBy": "122497047466218@lid",
-      "content": "*Halo, Sobat Garda!*\n\nMasih banyak yang mengira seluruh mahasiswa baru akan mengikuti *Pembukaan PKKMB UNESA 2026* secara luring. Eits, ternyata nggak semua, lho! 👀\n\nPada *17 Agustus 2026*, pembukaan PKKMB dilaksanakan dengan sistem *blended (luring & daring)*.\n\n📍 *Halaman Rektorat UNESA**\nSebanyak *4.000 mahasiswa baru* akan hadir secara luring sebagai delegasi dari masing-masing fakultas untuk mengikuti upacara, pengukuhan, dan pembukaan PKKMB.\n\n📍 *Graha Sawunggaling UNESA*\nSebanyak *500 mahasiswa baru* juga akan menjadi delegasi yang mengikuti rangkaian acara utama secara luring.\n\nSementara itu, *mahasiswa baru lainnya akan mengikuti kegiatan secara daring (online)* sesuai dengan ketentuan panitia.\n\n*Perlu diketahui, mekanisme penentuan delegasi diserahkan kepada kebijakan masing-masing fakultas.* Beberapa fakultas bahkan sudah mulai membagikan *link pendaftaran/form delegasi* bagi mahasiswa baru yang ingin mengikuti pembukaan secara luring.\n\nJadi, jangan sampai ketinggalan informasi ya!  *Sering-sering cek grup angkatan, grup program studi, serta Instagram resmi BEM fakultasmu*, karena seluruh informasi mengenai seleksi atau pendaftaran delegasi akan diumumkan melalui kanal tersebut."
+      "fileName": "GUIDEBOOK GARDA 2026_.pdf",
+      "mimetype": "application/pdf",
+      "caption": "",
+      "fileUrl": "1786767304421_GUIDEBOOK_GARDA_2026_.pdf",
+      "provider": "Cloudflare R2",
+      "publicId": "1786767304421_GUIDEBOOK_GARDA_2026_.pdf"
     },
     {
-      "id": 1785938717105,
-      "title": "info kuota pkkmb2",
-      "timestamp": "2026-08-05T14:05:17.105Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "*Kuota Delegasi Pembukaan PKKMB UNESA 2026*\n\n*Halaman Rektorat (Total 4.000 Mahasiswa)*\n* FIP: 351\n* FISIPOL: 351\n* FT: 351\n* FV: 331\n* FMIPA: 331\n* FEB: 351\n* FBS: 351\n* FIKK: 351\n* FKP: 301\n* FK: 225\n* FH: 331\n* FPSI: 331\n* PSDKU: 45\n\n*Graha Sawunggaling (Total 500 Mahasiswa)*\n* FIP: 42\n* FISIPOL: 42\n* FT: 42\n* FV: 41\n* FMIPA: 42\n* FEB: 42\n* FBS: 42\n* FIKK: 42\n* FKP: 30\n* FK: 30\n* FH: 30\n* FPSI: 30\n* PSDKU: 45"
-    },
-    {
-      "id": 1785949982344,
-      "title": "tutor ambil almet",
-      "timestamp": "2026-08-05T17:13:02.344Z",
-      "type": "text",
-      "savedBy": "71030806704156@lid",
-      "content": "https://www.instagram.com/reel/Dbqky5vKLli/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ=="
-    },
-    {
-      "id": 1786012693428,
-      "title": "outfit",
-      "timestamp": "2026-08-06T10:38:13.428Z",
+      "id": 1786804239807,
+      "title": "link pengumpulan pantun",
+      "timestamp": "2026-08-15T14:30:39.807Z",
       "type": "text",
       "savedBy": "275376257409114@lid",
-      "content": "https://www.instagram.com/reel/DbsgAgbzB2u/?igsh=YnNwZzNnMXV0N2ow"
+      "content": "https://docs.google.com/forms/d/e/1FAIpQLScFfJFdYMBjeASjdlFKpBvqOxAmy_wBcRlixRNSXnEaxQPrtg/viewform?usp=header"
     },
     {
-      "id": 1786033527316,
-      "title": "ketentuan pkkmb day1 2025",
-      "timestamp": "2026-08-06T16:25:27.316Z",
-      "type": "image",
-      "savedBy": "122497047466218@lid",
-      "fileName": "image.jpg",
-      "mimetype": "image/jpeg",
-      "caption": "",
-      "fileUrl": "https://files.catbox.moe/yvguy6.jpg",
-      "provider": "Catbox"
-    },
-    {
-      "id": 1786071774958,
-      "title": "rangkuman sosialisasi PKKMB",
-      "timestamp": "2026-08-07T03:02:54.958Z",
-      "type": "text",
-      "savedBy": "118322205077560@lid",
-      "content": "SEBAGIAN RANGKUMAN SOSIALISASI PKKMB GARDA UNESA 2026\n\n\nUntuk delegasi PKKMB offline tidak boleh membawa motor\n\n\nPENUGASAN \n\nDisclaimer nanti akan ada guide book yang lebih lengkap.\n\n1. Essay (pengumpulan maksimal *10 Agustus 2026*);\n2. Resume materi pra-PKKMB (maksimal *16 Agustus 2026*);\n3. Resume Materi PKKMB; \n4. Gerakan bahasa isyarat dalam deklarasi \"Kampus Ramah\".\n\nUntuk semua penugasan wajib cek Turnitin, maksimal 25%\nMenggunakan website submitin.id\nVoucher untuk Turnitin: UNESAKU\nHanya cek skor plagiarisme, AI detection tidak perlu \n\n\nPENUGASAN 1\n\n- Esai ditulis menggunakan Bahasa Indonesia yang baik dan benar sesuai Pedoman Umum Ejaan Bahasa Indonesia (PUEBI).\n- Esai merupakan karya asli peserta dan belum pernah dipublikasikan atau diikutsertakan dalam perlombaan lain.\n- Cover berisi logo UNESA, nama lengkap, prodi, dan fakultas.\n- Tema esai disesuaikan dengan tema yang telah ditentukan oleh panitia, yakni \"Membangun Generasi Unggul: Peran Mahasiswa UNESA dalam Mewujudkan Pendidikan Berkualitas Menuju Indonesia Emas 2045\" (tunggu informasi lebih lanjut).\n- Ukuran kertas A4, Font Times New Roman, ukuran Font 16 untuk judul dan 12 untuk isi.\n- Esai terdiri atas minimal 800 kata, maksimal 2000 (tidak termasuk cover dan daftar pustaka).\n- Menggunakan spasi 1,5 (Margin Top: 3 cm, Right: 3 cm, Bottom: 3 cm, Left: 4 cm)\n- Penomoran halaman dicantumkan di bagian kanan bawah.\n- Struktur esai secara umum terdiri atas pendahuluan, isi, dan penutup (diperbolehkan menggunakan subjudul).\n- Apabila menggunakan referensi, wajib mencantumkan sumber dengan format sitasi yang sesuai.\n- Batas plagiarisme maksimal 25% (dengan dibuktikan screenshot Turnitin).\n- Bukti hasil pengecekan Turnitin berupa screenshot dicantumkan pada halaman terakhir setelah daftar pustaka.\n\n\n1. Berkas dikumpulkan dalam 1 file PDF yang berisi:\na. Cover\nb. Naskah esai\nc. Daftar pustaka\nd. Lampiran hasil Turnitin.\n\n2. Nama file: Nama Lengkap_Prodi_Fakultas.pdf.\n3. Pengumpulan dilakukan melalui Google Drive yang telah disediakan oleh panitia.\n4. Deadline penugasan Esai Tanggal 6 September 2026 Pukul 23.59.\n5. Esai yang dikumpulkan setelah batas waktu tidak akan diproses.\n\nhttps://unesa.me/essaygardaunesa2026\n\n\nPENUGASAN 2\n\nKetentuan Resume Materi Pra - PKKMB\n\n1. Resume dibuat di buku tulis ukuran A5.\n2. Ditulis tangan menggunakan bolpoin tinta hitam dan rapi.\n3. Resume memuat poin-poin penting dari setiap materi yang disampaikan oleh narasumber/pemateri.\n4. Di pojok kanan atas ditulis:\n a. Tanggal pelaksanaan\n b. Nama kegiatan\n\n5. Di pojok kiri atas ditulis:\na. Nama lengkap\nb. Fakultas\nc. Program Studi\n\n8. Baris pertama ditulis judul materi.\n9. Panjang resume minimal 2 halaman.\n10. Hasil resume discan dan dikumpulkan dalam bentuk pdf.\n\n  Ketentuan: \n\n1. Format file: Fakultas_Prodi_Nama Lengkap.\n2. Pengumpulan dilakukan melalui Google Drive yang telah disediakan oleh panitia.\n3. Deadline Penugasan Resume Tanggal 16 Agustus 2026 Pukul 23.59.\n4. Resume yang dikumpulkan setelah batas waktu tidak akan diproses.\n\nhttps://unesa.me/resumeprapkkmbgardaunesa2026\n\n\nPENUGASAN HARI H PKKMB\n\n1. Resume hari H PKKMB;\n2. Menghafal gerakan bahasa isyarat yang akan diunggah panitia untuk pelaksanaan hari H.\n\n\nNanti akan ada pengisian Link Kondisi Kesehatan mental Garda Unesa 2026"
-    },
-    {
-      "id": 1786081723769,
-      "title": "ketentuan resume materi",
-      "timestamp": "2026-08-07T05:48:43.769Z",
-      "type": "image",
-      "savedBy": "122497047466218@lid",
-      "fileName": "image.jpg",
-      "mimetype": "image/jpeg",
-      "caption": "",
-      "fileUrl": "https://files.catbox.moe/5685p8.jpg",
-      "provider": "Catbox"
-    },
-    {
-      "id": 1786111816697,
-      "title": "link pengumpulan tugas",
-      "timestamp": "2026-08-07T14:10:16.697Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "https://unesa.me/essaygardaunesa2026\n\nhttps://unesa.me/resumeprapkkmbgardaunesa2026"
-    },
-    {
-      "id": 1786181853655,
-      "title": "guidebook 2026",
-      "timestamp": "2026-08-08T09:37:33.655Z",
+      "id": 1786804358144,
+      "title": "surat edaran pantun",
+      "timestamp": "2026-08-15T14:32:38.144Z",
       "type": "document",
-      "savedBy": "122497047466218@lid",
-      "fileName": "document_1786181853655.pdf",
+      "savedBy": "275376257409114@lid",
+      "fileName": "SE_Partisipasi Maba Kegiatan Gemas Pantun.pdf",
       "mimetype": "application/pdf",
-      "caption": "GUIDEBOOK GARDA 2026_.pdf",
-      "fileUrl": "https://files.catbox.moe/4rvju3.pdf",
-      "provider": "Catbox",
-      "publicId": "https://files.catbox.moe/4rvju3.pdf"
-    },
-    {
-      "id": 1786419350620,
-      "title": "atribut pkkmb",
-      "timestamp": "2026-08-11T03:35:50.620Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "‎ATRIBUT SEMENTARA PKKMB BATARA FAKULTAS VOKASI 👔\n‎DAY 1️⃣\n‎\n‎KEMEJA PUTIH BERSAKU\n‎BAWAHAN HITAM ( SPAN/ BOLEH BELAHAN BELAKANG )\n‎PECI ( PITA OREN 2,5cm DAN PIN BENDERA GARUDA GABUNG LATAR HITAM )\n‎JILBAB DISARANKAN TIDAK RAWIS DAN HAIRNET BAGI NONIS\n‎IKAT PINGGANG FULL HITAM\n‎DASI\n‎PANTOFEL HITAM DISARANKAN DOFF DAN TINGGI 3cm DAN BERPEREKAT\n‎KAOS KAKI PUTIH PANJANG DIATAS MATA KAKI\n‎ID CARD MERCH\n‎\n‎DAY 2️⃣\n‎\n‎KEMEJA BATIK BERKERAH (TIDAK DISARANKAN MODEL LAIN DAN GAPAPA BATIK COWOK)\n‎BAWAHAN HITAM ( SPAN/ BOLEH BELAHAN BELAKANG )\n‎PECI ( PITA OREN 2,5cm DAN PIN BENDERA GARUDA GABUNG LATAR HITAM )\n‎JILBAB DISARANKAN TIDAK RAWIS DAN HAIRNET BAGI NONIS\n‎IKAT PINGGANG FULL HITAM\n‎DASI\n‎PANTOFEL HITAM DISARANKAN DOFF DAN TINGGI 3cm DAN BERPEREKAT\n‎KAOS KAKI PUTIH PANJANG DIATAS MATA KAKI\n‎ID CARD MERCH\n‎\n‎DAY 3️⃣ DAN 4️⃣\n‎\n‎KAOS PUTIH POLOS ( DISARANKAN NO MERK ATAU GAMBAR DAN LENGAN PANJANG KHUSUS UNTUK YANG BERHIJAB )\n‎CELANA TRAINING HITAM ( BOLEH ADA GARIS WARNA LAIN YANG PENTING DOMINAN HITAM )\n‎JILBAB DISARANKAN TIDAK RAWIS DAN HAIRNET BAGI NONIS\n‎TOPI HITAM MERCH\n‎KAOS KAKI PUTIH PANJANG DIATAS MATA KAKI\n‎SEPATU OLAHRAGA ( MASIH DIPERTANYAKAN APAKAH BOLEH BEBAS WARNA )\n‎ID CARD MERCH\n‎\n‎DAN TAS 🎒 WAJIB BERWARNA FULL HITAM\n‎\n‎"
-    },
-    {
-      "id": 1786459472342,
-      "title": "ospek fakultas",
-      "timestamp": "2026-08-11T14:44:32.342Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "https://drive.google.com/drive/folders/1Sj5-1aCmyPnknbuo7k79yiOe0_5CyuGs"
-    },
-    {
-      "id": 1786461866635,
-      "title": "keperluan atribut ospek fak",
-      "timestamp": "2026-08-11T15:24:26.635Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "https://drive.google.com/drive/folders/1BgAAYkFGc4-qIXh2bHSey3iw0iyWcPvs\n\nkeperluan atribut ospek fakultas"
-    },
-    {
-      "id": 1786462685026,
-      "title": "Patokan Fotokopian ktt",
-      "timestamp": "2026-08-11T15:38:05.026Z",
-      "type": "text",
-      "savedBy": "71030806704156@lid",
-      "content": "https://maps.app.goo.gl/tiWgmKnFSmfSMQUq6"
-    },
-    {
-      "id": 1786516647775,
-      "title": "jargon kita",
-      "timestamp": "2026-08-12T06:37:27.775Z",
-      "type": "text",
-      "savedBy": "255632544415921@lid",
-      "content": "Jargon RMED\n*Satu ide, seribu karya*\n*REKAYASA MULTIMEDIA LUAR BIASAA*"
-    },
-    {
-      "id": 1786544137567,
-      "title": "playlist lagu wajib",
-      "timestamp": "2026-08-12T14:15:37.567Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "https://youtube.com/playlist?list=PLHe5vpr54tNE&si=hYMXu6w5hmJ4dlNQ\n\nini yang kutemukan gais, minus jayalah vokasiku"
-    },
-    {
-      "id": 1786544402783,
-      "title": "lirik buruh tani",
-      "timestamp": "2026-08-12T14:20:02.783Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "BURUH TANI\n\nBuruh tani mahasiswa rakyat miskin kota \nBersatu padu rebut demokrasi Gegap gempita dalam satu suara \nDemi tugas suci yang mulia\n\nHari hari esok adalah milik kita\nTerciptanya masyarakat sejahtera \nTerbentuknya tatanan masyarakat \nIndonesia baru tanpa orba\n\nMarilah kawan mari kita kabarkan \nDi tangan kita tergenggam arah bangsa \nMarilah kawan mari kita nyanyikan \nSebuah lagu... \nTentang pembebasan\n\nDi bawah kuasa tirani \nKususuri garis jalan ini \nBerjuta kali turun aksi \nBagiku satu langkah pasti \nBagiku satu langkah pasti"
-    },
-    {
-      "id": 1786544465477,
-      "title": "lirik mars unesa",
-      "timestamp": "2026-08-12T14:21:05.477Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "MARS UNESA\n\nUniversitas neg'ri surabaya\nBerperan aktif mencerdaskan bangsa\nTangguh, bermartabat, berbudaya\nTulus berbakti laksanakan tridharma\nUnggul, berprestasi, karya inovatif\nOlahraga, ilmu dan seni\nInklusif, adaptif, kolaboratif\nUntuk kejayaan neg'ri\nDerapkan langkahmu raihlah citamu\nBerani jujur dan tekun, jaga persatuan\nKobarkan s'mangatmu teguhkan jiwamu\nUntuk unesa satu langkah di depan"
-    },
-    {
-      "id": 1786544482113,
-      "title": "lirik hymne unesa",
-      "timestamp": "2026-08-12T14:21:22.113Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "Hymne UNESA\n\nDengan tekad berjuang\nDengan dasar Pancasila\nMeningkatkan kualitas\nSumber daya manusia\nUniversitas Negeri Surabaya\nMengembangkan ilmu berwawasan budaya\nDengan rasa cipta karya dan doa\nDalam semangat menyala\nMelangkahlah Unesa\nMenyiapkan tenaga tuk Indonesia nan jaya"
-    },
-    {
-      "id": 1786544496323,
-      "title": "totalitas perjuangan",
-      "timestamp": "2026-08-12T14:21:36.323Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "TOTALITAS PERJUANGAN\n\nKepada para mahasiswa\nYang merindukan kejayaan\nKepada rakyat yang kebingungan\nDi persimpang jalan\nKepada pewaris peradaban\nYang telah menggoreskan\nSebuah catatan kebanggaan\nDi lembar sejarah manusia\n\nWahai kalian yang rindu kemenangan\nWahai kaian yang turun ke jalan\nDemi mempersembahkan jiwa dan raga\nUntuk negeri tercinta.. 2x"
-    },
-    {
-      "id": 1786544505816,
-      "title": "darah juang",
-      "timestamp": "2026-08-12T14:21:45.816Z",
-      "type": "text",
-      "savedBy": "122497047466218@lid",
-      "content": "DARAH JUANG\n\nDi sini negeri kami\nTempat padi terhampar, \nSamuderanya kaya raya, \nNegeri kami subur tuhan\n\nDi negeri permai ini, \nBerjuta rakyat bersimbah luka, \nAnak kurus tak sekolah, \nPemuda desa tak kerja, \n\nReff:\nMereka dirampas haknya,\nTergusur dan lapar,\nBunda relakan darah juang kami,\nTuk membebaskan rakyat,\nPadamu kami berbakti,\nPadamu kami mengabdi,"
-    },
-    {
-      "id": 1786544641380,
-      "title": "sound buruh tani",
-      "timestamp": "2026-08-12T14:24:01.380Z",
-      "type": "audio",
-      "savedBy": "118322205077560@lid",
-      "fileName": "audio.mp3",
-      "mimetype": "audio/mpeg",
       "caption": "",
-      "fileUrl": "https://res.cloudinary.com/dvwp7mgic/video/upload/v1786544656/wa-bot-storage/1786544642977_audio.mp3.mp3",
-      "provider": "Cloudinary",
-      "publicId": "wa-bot-storage/1786544642977_audio.mp3",
-      "resourceType": "video"
-    },
-    {
-      "id": 1786544703022,
-      "title": "sound mars unesa",
-      "timestamp": "2026-08-12T14:25:03.022Z",
-      "type": "audio",
-      "savedBy": "118322205077560@lid",
-      "fileName": "audio.mp3",
-      "mimetype": "audio/mpeg",
-      "caption": "",
-      "fileUrl": "https://res.cloudinary.com/dvwp7mgic/video/upload/v1786544713/wa-bot-storage/1786544703725_audio.mp3.mp3",
-      "provider": "Cloudinary",
-      "publicId": "wa-bot-storage/1786544703725_audio.mp3",
-      "resourceType": "video"
-    },
-    {
-      "id": 1786544728878,
-      "title": "sound hymne unesa",
-      "timestamp": "2026-08-12T14:25:28.878Z",
-      "type": "audio",
-      "savedBy": "118322205077560@lid",
-      "fileName": "audio.mp3",
-      "mimetype": "audio/mpeg",
-      "caption": "",
-      "fileUrl": "https://res.cloudinary.com/dvwp7mgic/video/upload/v1786544738/wa-bot-storage/1786544729509_audio.mp3.mp3",
-      "provider": "Cloudinary",
-      "publicId": "wa-bot-storage/1786544729509_audio.mp3",
-      "resourceType": "video"
-    },
-    {
-      "id": 1786544791997,
-      "title": "sound totalitas perjuangan",
-      "timestamp": "2026-08-12T14:26:31.997Z",
-      "type": "audio",
-      "savedBy": "118322205077560@lid",
-      "fileName": "audio.mp3",
-      "mimetype": "audio/mpeg",
-      "caption": "",
-      "fileUrl": "https://res.cloudinary.com/dvwp7mgic/video/upload/v1786544813/wa-bot-storage/1786544793483_audio.mp3.mp3",
-      "provider": "Cloudinary",
-      "publicId": "wa-bot-storage/1786544793483_audio.mp3",
-      "resourceType": "video"
+      "fileUrl": "1786804358374_SE_Partisipasi_Maba_Kegiatan_Gemas_Pantun.pdf",
+      "provider": "Cloudflare R2",
+      "publicId": "1786804358374_SE_Partisipasi_Maba_Kegiatan_Gemas_Pantun.pdf"
     }
   ],
-  "120363409454124647@g.us": []
+  "120363409454124647@g.us": [
+    {
+      "id": 1786801698431,
+      "title": "nim",
+      "timestamp": "2026-08-15T13:48:18.431Z",
+      "type": "text",
+      "savedBy": "122497047466218@lid",
+      "content": "26092287013@mhs.unesa.ac.id"
+    }
+  ],
+  "120363139661890823@g.us": []
 }
