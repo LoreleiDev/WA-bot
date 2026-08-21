@@ -4,6 +4,7 @@ const { handleTagAll } = require('../features/tagall');
 const { handlePing, handleList } = require('../features/info');
 const { handleProfile } = require('../features/profile');
 const { handleNvo } = require('../features/nvo');
+const { enqueue } = require('../utils/antiSpam');
 const settings = require('../config/settings');
 const { jidNormalizedUser } = require('@whiskeysockets/baileys');
 
